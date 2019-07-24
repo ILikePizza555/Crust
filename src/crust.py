@@ -1,6 +1,7 @@
 """
 Main module for interacting with Crust. Mostly just some objects that store configuration
 """
+from enum import IntEnum, auto
 from pathlib import Path
 from typing import Union, Iterable, Optional, Dict
 from useful import normalize_path
@@ -12,7 +13,7 @@ class CrustModule:
     """
     def __init__(self,
                  paths: Union[str, Iterable[str], Iterable[Path]],
-                 name: Optional[str] = None,
+                 name: str,
                  variables: Dict[str, str] = {}):
         """
         Creates a new CrustModule.
@@ -27,3 +28,52 @@ class CrustModule:
         self.files: Iterable[Path] = normalize_path(paths)
         self.name = name
         self.variables = variables
+
+
+class CrustBuildConfiguration:
+    class WarningConfig(IntEnum):
+        NONE = 0,
+        PEDANTIC = auto(),
+        ALL = auto(),
+        EXTRA = auto()
+
+    class Optimization(IntEnum):
+        NONE = 0,
+        NORMAL = auto(),
+        SPEED = auto(),
+        CODE_SIZE = auto()
+
+    """
+    Defines a build configuration. Effectively, this is a name tied to a compiler and
+    any command-line options.
+    """
+    def __init__(self,
+                 name: str,
+                 compiler: Path,
+                 optimization: Optimization = Optimization.NORMAL,
+                 warnings: WarningConfig = WarningConfig.PEDANTIC,
+                 warnings_are_errors: bool = True,
+                 *additional_params):
+        """
+        Creates a new CrustBuildConfiguration
+
+        Parameters:
+            - `name` The name of the build configuration
+            - `compiler` The path to the compiler
+            - `optimization` The level of optimization to use for this configuration
+            - `warnings` The level of warnings to use for this configuration
+            - `warnings_are_errors` Set to `True` if warnings should be errors
+            - `additional_params` Any additional command-line option to pass to the compiler
+        """
+        self.name = name
+        self.compiler = compiler
+        self.optimization = optimization
+        self.warnings = warnings
+        self.warnings_are_errors = warnings_are_errors
+        self.additional_params = additional_params
+
+        self.modules = []
+
+    def add_module(self, module: CrustModule):
+        self.modules.append(module)
+        return self
