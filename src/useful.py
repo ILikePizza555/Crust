@@ -22,6 +22,6 @@ def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Pat
                 accepted_files.update(handle_path(g))
         except TypeError:
             # Not a string, try to handle it like a path
-            accepted_files.update(handle_path(g))
+            accepted_files.update(handle_path(p))
 
     return accepted_files
