@@ -14,6 +14,16 @@ class CrustModule:
                  paths: Union[str, Iterable[str], Iterable[Path]],
                  name: Optional[str] = None,
                  variables: Dict[str, str] = {}):
+        """
+        Creates a new CrustModule.
+
+        Parameters:
+            - `paths` A string, list of strings or Path objects which point to the files that are part of this module.
+                    Glob patterns are automatically parsed. Paths to directories load all files in the directory,
+                    but ignore sub-directories.
+            - `name` A string defining the name of the module.
+            - `variable` Any build variables or flags to be defined for this module.
+        """
         self.files: Iterable[Path] = normalize_path(paths)
         self.name = name
         self.variables = variables
