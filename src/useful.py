@@ -1,12 +1,9 @@
-"""
-This is the "utilities" file for this project.
-"""
-
 from glob import iglob
 from pathlib import Path
 from typeing import Iterable, Union
 
-def normalize_path(path: Union[str, Iterable[Union[Path, str]]) -> Iterable[Path]:
+
+def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Path]:
     # Convert a single instance to an interable
     if type(path) is str:
         path = [path]
