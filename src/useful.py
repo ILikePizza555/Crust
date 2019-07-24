@@ -1,6 +1,6 @@
 from glob import iglob
 from pathlib import Path
-from typeing import Iterable, Union
+from typing import Iterable, Union
 
 
 def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Path]:
