@@ -1,12 +1,16 @@
 import pytest # NOQA
+import unittest
 from src.useful import normalize_path
 
+def assert_count_equal(a, b, msg=None):
+    case = unittest.TestCase()
+    case.assertCountEqual(a, b, msg)
 
 def test_simple_str(shared_datadir):
     path = str(shared_datadir / "main.c")
 
     actual = normalize_path(path)
-    assert actual == (shared_datadir / "main.c",)
+    assert_count_equal(actual, (shared_datadir / "main.c",))
 
 
 def test_str_path_to_dir_with_no_subdir(shared_datadir):
@@ -15,20 +19,20 @@ def test_str_path_to_dir_with_no_subdir(shared_datadir):
     path = str(dir_path)
 
     actual = normalize_path(path)
-    assert actual == dir_path.iterdir()
+    assert_count_equal(actual, dir_path.iterdir())
 
 
 def test_str_path_to_dir_with_subdir(shared_datadir):
     # Passing a path to a directory should get all files in the directory, excluding subdirectories
     path = str(shared_datadir)
     actual = normalize_path(path)
-    assert actual == (p for p in shared_datadir.iterdir() if p.is_file())
+    assert_count_equal(actual, (p for p in shared_datadir.iterdir() if p.is_file()))
 
 
 def test_glob_str(shared_datadir):
     path = str(shared_datadir) + "/**/*.c"
     actual = normalize_path(path)
-    assert actual == shared_datadir.glob("**/*.c")
+    assert_count_equal(actual, shared_datadir.glob("**/*.c"))
 
 
 def test_str_iterable(shared_datadir):
@@ -38,14 +42,14 @@ def test_str_iterable(shared_datadir):
         str(shared_datadir) + "/main.c"
     ]
     actual = normalize_path(paths)
-    assert actual == [
+    assert_count_equal(actual, [
         shared_datadir / "a/utils.c",
         shared_datadir / "a/utils.h",
         shared_datadir / "b/include/convertions.h",
         shared_datadir / "b/include/network.h",
         shared_datadir / "b/include/parse_http.h",
         shared_datadir / "main.c"
-    ]
+    ])
 
 
 def test_mixed_iterable(shared_datadir):
@@ -58,11 +62,11 @@ def test_mixed_iterable(shared_datadir):
     ]
 
     actual = normalize_path(paths)
-    assert actual == [
+    assert_count_equal(actual, [
         shared_datadir / "a/utils.c",
         shared_datadir / "a/utils.h",
         shared_datadir / "b/src/convertions.c",
         shared_datadir / "b/src/network.c",
         shared_datadir / "b/src/parse_http.c",
         shared_datadir / "main.c"
-    ]
+    ])
