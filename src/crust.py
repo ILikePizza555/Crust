@@ -40,28 +40,8 @@ class CrustLocalExternal(NamedTuple):
     required: bool
 
 
-class CrustModule:
-    """
-    Defines a module. This is a directory of interest, with it's own namespace.
-    """
-    def __init__(self,
-                 paths: Union[str, Iterable[str], Iterable[Path]],
-                 name: str,
-                 variables: Dict[str, str] = {}):
-        """
-        Creates a new CrustModule.
-
-        Parameters:
-            - `paths` A string, list of strings or Path objects which point to the files that are part of this module.
-                    Glob patterns are automatically parsed. Paths to directories load all files in the directory,
-                    but ignore sub-directories.
-            - `name` A string defining the name of the module.
-            - `variable` Any build variables or flags to be defined for this module.
-        """
-        self.files: Iterable[Path] = normalize_path(paths)
-        self.name = name
-        self.variables = variables
-
+class ExternalManagerMixin:
+    def __init__(self):
         self.externals = []
 
     def add_remote_external(self,
@@ -89,7 +69,7 @@ class CrustModule:
 
         self.externals.append(CrustSystemExternal(name, directory, required))
         return self
-    
+
     def add_local_external(self,
                            path: Union[str, Path],
                            script: Iterable[str] = [],
@@ -100,6 +80,31 @@ class CrustModule:
 
         self.externals.append(CrustLocalExternal(path, script, artifacts, required))
         return self
+
+
+class CrustModule(ExternalManagerMixin):
+    """
+    Defines a module. This is a directory of interest, with it's own namespace.
+    """
+    def __init__(self,
+                 paths: Union[str, Iterable[str], Iterable[Path]],
+                 name: str,
+                 variables: Dict[str, str] = {}):
+        """
+        Creates a new CrustModule.
+
+        Parameters:
+            - `paths` A string, list of strings or Path objects which point to the files that are part of this module.
+                    Glob patterns are automatically parsed. Paths to directories load all files in the directory,
+                    but ignore sub-directories.
+            - `name` A string defining the name of the module.
+            - `variable` Any build variables or flags to be defined for this module.
+        """
+        ExternalManagerMixin.__init__(self)
+
+        self.files: Iterable[Path] = normalize_path(paths)
+        self.name = name
+        self.variables = variables
 
 
 class CrustBuildConfiguration:
@@ -151,3 +156,13 @@ class CrustBuildConfiguration:
     def add_module(self, module: CrustModule):
         self.modules.append(module)
         return self
+
+
+class CrustGlobal(ExternalManagerMixin):
+    """
+    Defines the global config.
+    """
+    def __init__(self):
+        self.name = "global"
+
+crust = CrustGlobal()
