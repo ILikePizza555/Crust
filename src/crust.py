@@ -165,6 +165,7 @@ class CrustGlobal(ExternalManagerMixin):
     def __init__(self):
         ExternalManagerMixin.__init__(self)
         self.name = "global"
+        self.external_install_dir = Path("./.externals/")
         self.modules = []
         self.default_compiler = None
         self.variables = {}
