@@ -126,7 +126,7 @@ class CrustBuildConfiguration:
     """
     def __init__(self,
                  name: str,
-                 compiler: Path,
+                 compiler: Optional[Path] = None,
                  optimization: Optimization = Optimization.NORMAL,
                  warnings: WarningConfig = WarningConfig.PEDANTIC,
                  warnings_are_errors: bool = True,
@@ -137,7 +137,7 @@ class CrustBuildConfiguration:
 
         Parameters:
             - `name` The name of the build configuration
-            - `compiler` The path to the compiler
+            - `compiler` The path to the compiler. 'None' uses the default compiler.
             - `optimization` The level of optimization to use for this configuration
             - `warnings` The level of warnings to use for this configuration
             - `warnings_are_errors` Set to `True` if warnings should be errors
@@ -163,6 +163,14 @@ class CrustGlobal(ExternalManagerMixin):
     Defines the global config.
     """
     def __init__(self):
+        ExternalManagerMixin.__init__(self)
         self.name = "global"
+        self.modules = []
+        self.default_compiler = None
+        self.variables = {}
+        self.compiler_flags = []
+    
+    def __call__(self):
+        pass
 
 crust = CrustGlobal()
