@@ -3,25 +3,40 @@ Main module for interacting with Crust. Mostly just some objects that store conf
 """
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import Union, Optional, Iterable, Dict
+from typing import Union, Optional, Iterable, Dict, NamedTuple
 from useful import normalize_path
 
 
-class CrustExternal:
+class CrustRemoteExternal(NamedTuple):
     """
-    Defines an external project that's needed to build the current one.
-    The object defines the location of the external, instructions on how to build it,
-    and any artifacts to be used.
+    An external that exists somewhere on the Internet, and needs to be
+    downloaded and built locally.
     """
-    def __init__(self,
-                 location: Union[str, Path],
-                 name: Optional[str] = None,
-                 script: Iterable[str] = [],
-                 artifacts: Iterable[Union[str, Path]] = []):
-        self.location = location
-        self.name = name
-        self.script = script
-        self.artifacts = artifacts
+    url: str
+    name: str
+    script: Iterable[str]
+    artifacts: Iterable[str]
+    required: bool
+
+
+class CrustSystemExternal(NamedTuple):
+    """
+    A pre-compiled external that is installed on the system.
+    """
+    name: str
+    directory: Optional[Path],
+    required: bool
+
+
+class CrustLocalExternal(NamedTuple):
+    """
+    An external that exists somewhere on the system, but still needs to be built.
+    """
+    path: Path
+    name: str
+    script: Iterable[str]
+    artifacts: Iterable[str]
+    required: bool
 
 
 class CrustModule:
@@ -45,6 +60,13 @@ class CrustModule:
         self.files: Iterable[Path] = normalize_path(paths)
         self.name = name
         self.variables = variables
+
+        self.externals = []
+    
+    def require_remote(self,
+                       url: str,
+                       name: Optional[str] = None,
+                       script: Iterable[str] = [])
 
 
 class CrustBuildConfiguration:
@@ -70,6 +92,7 @@ class CrustBuildConfiguration:
                  optimization: Optimization = Optimization.NORMAL,
                  warnings: WarningConfig = WarningConfig.PEDANTIC,
                  warnings_are_errors: bool = True,
+                 enable_static_linking: bool = True,
                  *additional_params):
         """
         Creates a new CrustBuildConfiguration
@@ -87,6 +110,7 @@ class CrustBuildConfiguration:
         self.optimization = optimization
         self.warnings = warnings
         self.warnings_are_errors = warnings_are_errors
+        self.enable_static_linking = enable_static_linking
         self.additional_params = additional_params
 
         self.modules = []
