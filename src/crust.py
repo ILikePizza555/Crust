@@ -3,6 +3,7 @@ Main module for interacting with Crust. Mostly just some objects that store conf
 """
 from enum import IntEnum, auto
 from pathlib import Path
+from urllib.parse import urlsplit
 from typing import Union, Optional, Iterable, Dict, NamedTuple
 from useful import normalize_path
 
@@ -24,7 +25,7 @@ class CrustSystemExternal(NamedTuple):
     A pre-compiled external that is installed on the system.
     """
     name: str
-    directory: Optional[Path],
+    directory: Optional[Path]
     required: bool
 
 
@@ -62,11 +63,43 @@ class CrustModule:
         self.variables = variables
 
         self.externals = []
+
+    def add_remote_external(self,
+                            url: str,
+                            name: Optional[str] = None,
+                            script: Iterable[str] = [],
+                            artifacts: Iterable[str] = [],
+                            required: bool = True) -> "CrustModule":
+        """
+        Adds a remote dependency as a requirement for this module.
+        """
+        if not name:
+            name = urlsplit(url)["path"]
+
+        self.externals.append(CrustRemoteExternal(
+            url, name, script, artifacts, required
+        ))
+
+        return self
+
+    def add_system_external(self, 
+                            name: str, 
+                            directory: Union[str, Path, None] = None,
+                            required: bool = True) -> "CrustModule":
+
+        self.externals.append(CrustSystemExternal(name, directory, required))
+        return self
     
-    def require_remote(self,
-                       url: str,
-                       name: Optional[str] = None,
-                       script: Iterable[str] = [])
+    def add_local_external(self,
+                           path: Union[str, Path],
+                           script: Iterable[str] = [],
+                           artifacts: Iterable[str] = [],
+                           required: bool = True) -> "CrustModule":
+        if type(path) is str:
+            path = Path(str)
+
+        self.externals.append(CrustLocalExternal(path, script, artifacts, required))
+        return self
 
 
 class CrustBuildConfiguration:
