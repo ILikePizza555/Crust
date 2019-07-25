@@ -169,8 +169,9 @@ class CrustGlobal(ExternalManagerMixin):
         self.default_compiler = None
         self.variables = {}
         self.compiler_flags = []
-    
+
     def __call__(self):
         pass
+
 
 crust = CrustGlobal()
