@@ -7,7 +7,7 @@ import re
 from enum import Enum, auto
 from typing import Optional
 
-LINE_RE = re.compile(r"#(?P<directive>.*) (?P<expression>.*)")
+LINE_RE = re.compile(r"#(?P<directive>\S*)(?: (?P<expression>.*))?")
 OBJECT_MACRO_RE = re.compile(r"^(?:#define )?(?P<identifier>[^\s\(\)\#]*) (?P<tokens>.*)")
 FUNCTION_MACRO_RE = re.compile(r"^(?:#define )?(?P<identifier>\S*)(?P<args>\(.*\)) (?P<tokens>.*)")
 
