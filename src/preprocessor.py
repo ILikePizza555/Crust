@@ -38,8 +38,12 @@ def parse_line(line: str) -> Optional[tuple]:
     if not line_match:
         return None
 
-    directive = Directives[line_match.group("directive").upper()]
-    expr = line_match.group("expression")
+    try:
+        # Enum determines valid directives
+        directive = Directives[line_match.group("directive").upper()]
+        expr = line_match.group("expression")
+    except KeyError:
+        raise PreProcessorParseError(line, "Invalid preprocessor directive: " + line_match.group("directive"))
 
     if directive is Directives.DEFINE:
         # Need to figure out if this is an object macro or a function macro
