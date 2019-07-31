@@ -4,6 +4,7 @@ the purpose of this preprocessor is to determine the relationship between compil
 """
 
 import re
+import string
 from enum import Enum, auto
 from typing import Optional
 
@@ -53,7 +54,7 @@ def parse_line(line: str) -> Optional[tuple]:
 
         expr_match = FUNCTION_MACRO_RE.match(expr)
         if expr_match is not None:
-            args_list = [x.strip() for x in expr_match.group("args").strip().split(",")]
+            args_list = [x.strip() for x in expr_match.group("args").strip(string.whitespace + "()").split(",")]
             return (directive, expr_match.group("identifier"), args_list, expr_match.group("tokens"))
 
         raise PreProcessorParseError(line, "Invalid Macro Definition")
