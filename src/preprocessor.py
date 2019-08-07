@@ -21,6 +21,17 @@ class PreProcessorParseError(Exception):
         self.line = line
         self.reason = reason
 
+class MatchError(Exception):
+    """Thrown when a regex match fails (say for an expression). This is intended to be caught."""
+    pass
+
+
+class UnknownTokenError(Exception):
+    def __init__(self, token):
+        self.token = token
+    
+    def __str__(self):
+        return "Unknown token: " + self.token
 
 class Directives(Enum):
     INCLUDE = auto()
@@ -52,6 +63,30 @@ class ComparisonOperators(Enum):
         }[operator_string]
 
 
+class ComparisonExpression():
+    @staticmethod
+    def from_expr(cls, expr: str) -> "ComparisonExpression":
+        expr_match = CONSTANT_COMPARISON_EXPR_RE.match(expr)
+        if not expr_match:
+            raise MatchError()
+
+        try:
+            operator_string = expr_match.group("operator")
+            operator_value = ComparisonOperators.from_string(operator_string)
+        except KeyError:
+            raise UnknownTokenError(operator_string)
+
+        left_parameter = expr_match("p_1")
+        right_parameter = expr_match("p_2")
+
+        return cls(operator_value, left_parameter, right_parameter)
+
+    def __init__(self, op: ComparisonOperators, left_parameter: str, right_parameter: str):
+        self.op = op
+        self.left_parameter = left_parameter
+        self.right_parameter = right_parameter
+
+
 def parse_line(line: str) -> Optional[tuple]:
     line_match = LINE_RE.match(line)
 
@@ -79,20 +114,13 @@ def parse_line(line: str) -> Optional[tuple]:
         raise PreProcessorParseError(line, "Invalid Macro Definition")
     elif directive is Directives.IF or directive is Directives.ELIF:
         # TODO: Need to implement full expression parsing, allowing for logical and arithmetic operators
-        expr_match = CONSTANT_COMPARISON_EXPR_RE.match(expr)
-        if expr_match is not None:
-            try:
-                operator_string = expr_match.group("operator")
-                operator_value = ComparisonOperators.from_string(operator_string)
-            except KeyError:
-                raise PreProcessorParseError(line, "Invalid operator: " + operator_string)
-
-            left_parameter = expr_match.group("p_1")
-            right_parameter = expr_match.group("p_2")
-
-            return (directive, operator_value, left_parameter, right_parameter)
-
-        raise PreProcessorParseError(line, "Invalid expression")
+        try:
+            comp_expr = ComparisonExpression.from_expr(expr)
+            return (directive, comp_expr)
+        except MatchError:
+            raise PreProcessorParseError(line, "Invalid expression")
+        except UnknownTokenError as e:
+            raise PreProcessorParseError(line, str(e))
     else:
         return (directive, expr)
 
