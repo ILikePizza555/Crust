@@ -21,6 +21,7 @@ class PreProcessorParseError(Exception):
         self.line = line
         self.reason = reason
 
+
 class MatchError(Exception):
     """Thrown when a regex match fails (say for an expression). This is intended to be caught."""
     pass
@@ -29,9 +30,10 @@ class MatchError(Exception):
 class UnknownTokenError(Exception):
     def __init__(self, token):
         self.token = token
-    
+
     def __str__(self):
         return "Unknown token: " + self.token
+
 
 class Directives(Enum):
     INCLUDE = auto()
