@@ -11,6 +11,7 @@ from typing import Optional
 LINE_RE = re.compile(r"#(?P<directive>\S*)(?: (?P<expression>.*))?")
 OBJECT_MACRO_RE = re.compile(r"^(?:#define )?(?P<identifier>[^\s\(\)\#]*) (?P<tokens>.*)")
 FUNCTION_MACRO_RE = re.compile(r"^(?:#define )?(?P<identifier>\S*)(?P<args>\(.*\)) (?P<tokens>.*)")
+CONSTANT_COMPARISON_EXPR_RE = re.compile(r"^(?P<p_1>\w+) ?(?P<operator>[=<>!]+) ?(?P<p_2>.*)")
 
 
 class PreProcessorParseError(Exception):
@@ -31,6 +32,24 @@ class Directives(Enum):
     ELSE = auto()
     ENDIF = auto()
     PRAGMA = auto()
+
+
+class ComparisonOperators(Enum):
+    EQUAL = auto()
+    LESS_THAN = auto()
+    GREATER_THAN = auto()
+    LESS_THAN_OR_EQUAL = auto()
+    GREATER_THAN_OR_EQUAL = auto()
+
+    @staticmethod
+    def from_string(cls, operator_string: str) -> "ComparisonOperators":
+        return {
+            "==": cls.EQUAL,
+            "<": cls.LESS_THAN,
+            ">": cls.GREATER_THAN,
+            "<=": cls.LESS_THAN_OR_EQUAL,
+            ">=": cls.GREATER_THAN_OR_EQUAL
+        }[operator_string]
 
 
 def parse_line(line: str) -> Optional[tuple]:
@@ -58,5 +77,23 @@ def parse_line(line: str) -> Optional[tuple]:
             return (directive, expr_match.group("identifier"), args_list, expr_match.group("tokens"))
 
         raise PreProcessorParseError(line, "Invalid Macro Definition")
+    elif directive is Directives.IF or directive is Directives.ELIF:
+        # TODO: Need to implement full expression parsing, allowing for logical and arithmetic operators
+        expr_match = CONSTANT_COMPARISON_EXPR_RE.match(expr)
+        if expr_match is not None:
+            try:
+                operator_string = expr_match.group("operator")
+                operator_value = ComparisonOperators.from_string(operator_string)
+            except KeyError:
+                raise PreProcessorParseError(line, "Invalid operator: " + operator_string)
+
+            left_parameter = expr_match.group("p_1")
+            right_parameter = expr_match.group("p_2")
+
+            return (directive, operator_value, left_parameter, right_parameter)
+
+        raise PreProcessorParseError(line, "Invalid expression")
     else:
         return (directive, expr)
+
+
