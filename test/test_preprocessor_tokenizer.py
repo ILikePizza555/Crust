@@ -46,11 +46,10 @@ test_data = [
 ]
 
 
-@pytest.mark.parametize(
-    "line_str, line_num, expected",
-    [x[1:4] for x in test_data],
-    ids=[x[0] for x in test_data]
-)
-def test_tokenizer(line_str: str, line_num: int, expected):
+@pytest.mark.parametrize(
+    "line_str,line_num,expected",
+    argvalues=[x[1:4] for x in test_data],
+    ids=[x[0] for x in test_data])
+def test_tokenizer(line_str, line_num, expected):
     actual = _tokenize_line(line_str, line_num)
     assert actual == expected
