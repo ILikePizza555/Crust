@@ -59,8 +59,11 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
     if not line.startswith("#"):
         return None
 
-    current_index = line.index(" ", 1)
-    line_tokens = [Token(TokenType.DIRECTIVE, line_number, 1, line[1:current_index])]
+    try:
+        current_index = line.index(" ", 1)
+        line_tokens = [Token(TokenType.DIRECTIVE, line_number, 1, line[1:current_index])]
+    except ValueError:
+        return [Token(TokenType.DIRECTIVE, line_number, 1, line[1:])]
 
     while current_index < len(line):
         if line[current_index].isspace():
