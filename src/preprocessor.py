@@ -11,7 +11,7 @@ from typing import Optional, List, NamedTuple, Iterable
 DIRECTIVE_RE = re.compile(r"^#(?P<directive>\S*)(?: (.*))?")
 INT_CONST_RE = re.compile(r"^(\d+)")
 CHAR_CONST_RE = re.compile(r"^('.')")
-IDENTIFIER_RE = re.compile(r"^(\w\D+)")
+IDENTIFIER_RE = re.compile(r"^([A-Za-z_]+)")
 
 
 class UnknownTokenError(Exception):
@@ -88,16 +88,17 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
             current_index += len(token.text)
             continue
 
-        # Run the regex searches for variable-length tokens
-        re_match = INT_CONST_RE.match(line, pos=current_index)
+        # Run the regex searches for variable-length tokens at the start of current_index
+        line_slice = line[current_index:]
+        re_match = INT_CONST_RE.match(line_slice)
         if re_match:
             token = Token(TokenType.INTEGER_CONST, line_number, current_index, re_match.group(0))
 
-        re_match = CHAR_CONST_RE.match(line, pos=current_index)
+        re_match = CHAR_CONST_RE.match(line_slice)
         if re_match:
             token = Token(TokenType.CHAR_CONST, line_number, current_index, re_match.group(0))
 
-        re_match = IDENTIFIER_RE.match(line, pos=current_index)
+        re_match = IDENTIFIER_RE.match(line_slice)
         if re_match:
             token = Token(TokenType.IDENTIFIER, line_number, current_index, re_match.group(0))
 
