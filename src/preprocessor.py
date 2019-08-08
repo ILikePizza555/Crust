@@ -11,7 +11,8 @@ from typing import Optional, List, NamedTuple, Iterable
 DIRECTIVE_RE = re.compile(r"^#(?P<directive>\S*)(?: (.*))?")
 INT_CONST_RE = re.compile(r"^(\d+)")
 CHAR_CONST_RE = re.compile(r"^('.')")
-IDENTIFIER_RE = re.compile(r"^([A-Za-z_]+)")
+IDENTIFIER_RE = re.compile(r"^([A-Za-z_.]+)")
+BRACES_FILE_RE = re.compile(r"^(<\w>)")
 
 
 class UnknownTokenError(Exception):
