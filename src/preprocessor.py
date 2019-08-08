@@ -10,8 +10,18 @@ from typing import Optional, List, NamedTuple, Iterable
 
 DIRECTIVE_RE = re.compile(r"^#(?P<directive>\S*)(?: (.*))?")
 INT_CONST_RE = re.compile(r"^(\d+)")
-CHAR_CONST_RE = re.compile(r"^('\S')")
-IDENTIFIER_RE = re.compile(r"(\w+)")
+CHAR_CONST_RE = re.compile(r"^('.')")
+IDENTIFIER_RE = re.compile(r"^(\w\D+)")
+
+
+class UnknownTokenError(Exception):
+    def __init__(self, line_number: int, column_number: int, token: str):
+        self.line_number = line_number
+        self.column_number = column_number
+        self.token = token
+
+    def __str__(self):
+        return f"Unknown token \"{self.token}\" on line {self.line_number}, {self.column_number}"
 
 
 @unique
@@ -90,7 +100,7 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
             line_tokens.append(token)
             current_index += len(token.text)
         else:
-            raise Exception
+            raise UnknownTokenError(line_number, current_index, line[current_index])
 
     return line_tokens
 
