@@ -22,20 +22,20 @@ test_data = [
         Token(TokenType.LPARAN, 6, 14, "("),
         Token(TokenType.IDENTIFIER, 6, 15, "name"),
         Token(TokenType.RPARAN, 6, 19, ")"),
-        Token(TokenType.IDENTIFIER, 6, 20, "typedef"),
-        Token(TokenType.IDENTIFIER, 6, 28, "struct"),
-        Token(TokenType.IDENTIFIER, 6, 35, "name"),
-        Token(TokenType.TOKEN_CONCATINATION, 6, 39, "##"),
-        Token(TokenType.IDENTIFIER, 6, 41, "_s"),
-        Token(TokenType.IDENTIFIER, 6, 44, "name"),
-        Token(TokenType.TOKEN_CONCATINATION, 6, 48, "##"),
-        Token(TokenType.IDENTIFIER, 6, 50, "_t")
+        Token(TokenType.IDENTIFIER, 6, 21, "typedef"),
+        Token(TokenType.IDENTIFIER, 6, 29, "struct"),
+        Token(TokenType.IDENTIFIER, 6, 36, "name"),
+        Token(TokenType.TOKEN_CONCATINATION, 6, 40, "##"),
+        Token(TokenType.IDENTIFIER, 6, 42, "_s"),
+        Token(TokenType.IDENTIFIER, 6, 45, "name"),
+        Token(TokenType.TOKEN_CONCATINATION, 6, 49, "##"),
+        Token(TokenType.IDENTIFIER, 6, 51, "_t")
     ]),
     ("Conditional statement", "#if X <= 5", 7, [
         Token(TokenType.DIRECTIVE, 7, 1, "if"),
-        Token(TokenType.IDENTIFIER, 7, 3, "X"),
-        Token(TokenType.LESS_THAN_OR_EQUAL, 7, 5, "<="),
-        Token(TokenType.INTEGER_CONST, 7, 8, "5")
+        Token(TokenType.IDENTIFIER, 7, 4, "X"),
+        Token(TokenType.LESS_THAN_OR_EQUAL, 7, 6, "<="),
+        Token(TokenType.INTEGER_CONST, 7, 9, "5")
     ]),
     ("Include statement", "#include <stdio.h>", 8, [
         Token(TokenType.DIRECTIVE, 8, 1, "include"),
