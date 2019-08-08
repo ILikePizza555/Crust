@@ -92,13 +92,12 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
         else:
             raise Exception
 
+    return line_tokens
+
 
 def tokenize_lines(source_lines: Iterable[str]) -> List[List[Token]]:
     """
     Takes a source file split into lines and tokeninzes it.
     C code (lines which do not start with "#") are ignored.
     """
-    tokenized_lines = []
-
-    for line in source_lines:
-        line_match = 
+    pass
