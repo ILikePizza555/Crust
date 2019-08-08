@@ -9,12 +9,12 @@ test_data = [
     ("Integer constant", "#define TEST_INT 1234", 4, [
         Token(TokenType.DIRECTIVE, 4, 1, "define"),
         Token(TokenType.IDENTIFIER, 4, 8, "TEST_INT"),
-        Token(TokenType.INTEGER_CONST, 4, 18, "1234")
+        Token(TokenType.INTEGER_CONST, 4, 17, "1234")
     ]),
     ("Character constant", "#define TEST_CHAR 's'", 5, [
         Token(TokenType.DIRECTIVE, 5, 1, "define"),
         Token(TokenType.IDENTIFIER, 5, 8, "TEST_CHAR"),
-        Token(TokenType.CHAR_CONST, 5, 17, "'s'")
+        Token(TokenType.CHAR_CONST, 5, 18, "'s'")
     ]),
     ("Function macro", "#define FMACRO(name) typedef struct name##_s name##_t", 6, [
         Token(TokenType.DIRECTIVE, 6, 1, "define"),
