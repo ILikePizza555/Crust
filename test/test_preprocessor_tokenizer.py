@@ -3,9 +3,9 @@ from src.preprocessor import _tokenize_line, Token, TokenType
 
 
 test_data = [
-    ("Empty String", "", 0, None)
-    ("Null directive", "#", 0, [Token(TokenType.DIRECTIVE, 0, 1, "")])
-    ("No parameter directive", "#pragma", 0 [Token(TokenType.DIRECTIVE, 0, 1, "pragma")])
+    ("Empty String", "", 0, None),
+    ("Null directive", "#", 0, [Token(TokenType.DIRECTIVE, 0, 1, "")]),
+    ("No parameter directive", "#pragma", 0, [Token(TokenType.DIRECTIVE, 0, 1, "pragma")]),
     ("Integer constant", "#define TEST_INT 1234", 4, [
         Token(TokenType.DIRECTIVE, 4, 1, "define"),
         Token(TokenType.IDENTIFIER, 4, 8, "TEST_INT"),
@@ -51,6 +51,6 @@ test_data = [
     [x[1:4] for x in test_data],
     ids=[x[0] for x in test_data]
 )
-def test_tokenizer(self, line_str: str, line_num: int, expected):
+def test_tokenizer(line_str: str, line_num: int, expected):
     actual = _tokenize_line(line_str, line_num)
     assert actual == expected
