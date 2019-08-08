@@ -30,22 +30,22 @@ class TokenType(Enum):
     IDENTIFIER = 1
     INTEGER_CONST = 2
     CHAR_CONST = 3
+    DEFINED = "defined"
+    ELLIPSIS = "..."
+    LESS_THAN_OR_EQUAL = "<="
+    GREATER_THAN_OR_EQUAL = ">="
+    EQUAL = "=="
+    AND = "&&"
+    OR = "||"
+    TOKEN_CONCATINATION = "##"
     LPARAN = "("
     RPARAN = ")"
     QUOTE = "\""
     COMMA = ","
-    LESS_THAN_OR_EQUAL = "<="
-    GREATER_THAN_OR_EQUAL = ">="
     LESS_THAN = "<"
     GREATER_THAN = ">"
-    EQUAL = "=="
     NOT = "!"
-    AND = "&&"
-    OR = "||"
-    DEFINED = "defined"
-    ELLIPSIS = "..."
     TOKEN_STRINGIFICATION = "#"
-    TOKEN_CONCATINATION = "##"
 
 
 class Token(NamedTuple):
