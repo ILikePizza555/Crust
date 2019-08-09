@@ -64,7 +64,8 @@ TOKEN_MAP = (
     (TokenType.LESS_THAN,               "<"),
     (TokenType.GREATER_THAN,            ">"),
     (TokenType.NOT,                     "!"),
-    (TokenType.TOKEN_STRINGIFICATION,   "#")
+    (TokenType.TOKEN_STRINGIFICATION,   "#"),
+    (TokenType.IDENTIFIER,              re.compile(r"^(\w+)"))
 )
 
 
@@ -93,9 +94,10 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
         token = None
 
         for token_type, matcher in TOKEN_MAP:
-            if type(matcher) is str and line.startswith(matcher, current_index):
-                token = Token(token_type, line_number, current_index, matcher)
-                break
+            if type(matcher) is str:
+                if line.startswith(matcher, current_index):
+                    token = Token(token_type, line_number, current_index, matcher)
+                    break
             else:
                 line_slice = line[current_index:]
                 re_match = matcher.match(line_slice)
