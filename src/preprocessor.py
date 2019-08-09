@@ -45,7 +45,6 @@ class TokenType(Enum):
 
 
 TOKEN_MAP = (
-    (TokenType.DIRECTIVE,               re.compile(r"^#(?P<directive>\S*)(?: (.*))?")),
     (TokenType.STRING,                  re.compile(r'^(".*")')),
     (TokenType.FILENAME,                re.compile(r'^(<.*>)')),
     (TokenType.INTEGER_CONST,           re.compile(r"^(\d+)")),
