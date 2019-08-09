@@ -40,6 +40,16 @@ test_data = [
     ("Include statement", "#include <stdio.h>", 8, [
         Token(TokenType.DIRECTIVE, 8, 1, "include"),
         Token(TokenType.FILENAME, 8, 9, "<stdio.h>")
+    ]),
+    ("Conditionals aren't files", "#pragma 34 <= TEST_1 || TEST_2 > 55", 9, [
+        Token(TokenType.DIRECTIVE, 9, 1, "pragma"),
+        Token(TokenType.INTEGER_CONST, 9, 8, "34"),
+        Token(TokenType.LESS_THAN_OR_EQUAL, 9, 11, "<="),
+        Token(TokenType.IDENTIFIER, 9, 14, "TEST_1"),
+        Token(TokenType.OR, 9, 21, "||"),
+        Token(TokenType.IDENTIFIER, 9, 24, "TEST_2"),
+        Token(TokenType.GREATER_THAN, 9, 31, ">"),
+        Token(TokenType.INTEGER_CONST, 9, 33, "55")
     ])
 ]
 
