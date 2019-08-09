@@ -5,14 +5,8 @@ the purpose of this preprocessor is to determine the relationship between compil
 
 import re
 import string
-from enum import Enum, unique
+from enum import Enum, unique, auto
 from typing import Optional, List, NamedTuple, Iterable
-
-DIRECTIVE_RE = re.compile(r"^#(?P<directive>\S*)(?: (.*))?")
-INT_CONST_RE = re.compile(r"^(\d+)")
-CHAR_CONST_RE = re.compile(r"^('.')")
-IDENTIFIER_RE = re.compile(r"^([A-Za-z_.]+)")
-BRACES_FILE_RE = re.compile(r"^(<\w>)")
 
 
 class UnknownTokenError(Exception):
@@ -27,26 +21,51 @@ class UnknownTokenError(Exception):
 
 @unique
 class TokenType(Enum):
-    DIRECTIVE = 0
-    IDENTIFIER = 1
-    INTEGER_CONST = 2
-    CHAR_CONST = 3
-    DEFINED = "defined"
-    ELLIPSIS = "..."
-    LESS_THAN_OR_EQUAL = "<="
-    GREATER_THAN_OR_EQUAL = ">="
-    EQUAL = "=="
-    AND = "&&"
-    OR = "||"
-    TOKEN_CONCATINATION = "##"
-    LPARAN = "("
-    RPARAN = ")"
-    QUOTE = "\""
-    COMMA = ","
-    LESS_THAN = "<"
-    GREATER_THAN = ">"
-    NOT = "!"
-    TOKEN_STRINGIFICATION = "#"
+    DIRECTIVE = auto()
+    IDENTIFIER = auto()
+    INTEGER_CONST = auto()
+    CHAR_CONST = auto()
+    STRING = auto()
+    FILENAME = auto()
+    DEFINED = auto()
+    ELLIPSIS = auto()
+    LESS_THAN_OR_EQUAL = auto()
+    GREATER_THAN_OR_EQUAL = auto()
+    EQUAL = auto()
+    AND = auto()
+    OR = auto()
+    TOKEN_CONCATINATION = auto()
+    LPARAN = auto()
+    RPARAN = auto()
+    COMMA = auto()
+    LESS_THAN = auto()
+    GREATER_THAN = auto()
+    NOT = auto()
+    TOKEN_STRINGIFICATION = auto()
+
+
+TOKEN_MAP = (
+    (TokenType.DIRECTIVE,               re.compile(r"^#(?P<directive>\S*)(?: (.*))?")),
+    (TokenType.STRING,                  re.compile(r'^(".*")')),
+    (TokenType.FILENAME,                re.compile(r'^(<.*>)')),
+    (TokenType.INTEGER_CONST,           re.compile(r"^(\d+)")),
+    (TokenType.CHAR_CONST,              re.compile(r"^('.')")),
+    (TokenType.DEFINED,                 "defined"),
+    (TokenType.ELLIPSIS,                "..."),
+    (TokenType.LESS_THAN_OR_EQUAL,      "<="),
+    (TokenType.GREATER_THAN_OR_EQUAL,   ">="),
+    (TokenType.EQUAL,                   "=="),
+    (TokenType.AND,                     "&&"),
+    (TokenType.OR,                      "||"),
+    (TokenType.TOKEN_CONCATINATION,     "##"),
+    (TokenType.LPARAN,                  "("),
+    (TokenType.RPARAN,                  ")"),
+    (TokenType.COMMA,                   ","),
+    (TokenType.LESS_THAN,               "<"),
+    (TokenType.GREATER_THAN,            ">"),
+    (TokenType.NOT,                     "!"),
+    (TokenType.TOKEN_STRINGIFICATION,   "#")
+)
 
 
 class Token(NamedTuple):
@@ -73,35 +92,16 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
 
         token = None
 
-        # Fixed-length tokens
-        for name, member in TokenType.__members__.items():
-            # Skip over non-string members, they're for regex
-            if type(member.value) is not str:
-                continue
-
-            if line.startswith(member.value, current_index):
-                token = Token(member, line_number, current_index, member.value)
+        for token_type, matcher in TOKEN_MAP:
+            if type(matcher) is str and line.startswith(matcher, current_index):
+                token = Token(token_type, line_number, current_index, matcher)
                 break
-
-        # Check if a token has been found, if it has, skip over regex
-        if token:
-            line_tokens.append(token)
-            current_index += len(token.text)
-            continue
-
-        # Run the regex searches for variable-length tokens at the start of current_index
-        line_slice = line[current_index:]
-        re_match = INT_CONST_RE.match(line_slice)
-        if re_match:
-            token = Token(TokenType.INTEGER_CONST, line_number, current_index, re_match.group(0))
-
-        re_match = CHAR_CONST_RE.match(line_slice)
-        if re_match:
-            token = Token(TokenType.CHAR_CONST, line_number, current_index, re_match.group(0))
-
-        re_match = IDENTIFIER_RE.match(line_slice)
-        if re_match:
-            token = Token(TokenType.IDENTIFIER, line_number, current_index, re_match.group(0))
+            else:
+                line_slice = line[current_index:]
+                re_match = matcher.match(line_slice)
+                if re_match:
+                    token = Token(token_type, line_number, current_index, re_match.group(0))
+                    break
 
         if token:
             line_tokens.append(token)
@@ -121,3 +121,5 @@ def tokenize_lines(source_lines: Iterable[str], skip_c=True) -> Iterable[List[To
         line_tokens = _tokenize_line(line, i)
         if line_tokens or (not line_tokens and not skip_c):
             yield line_tokens
+
+
