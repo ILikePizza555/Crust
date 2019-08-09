@@ -112,9 +112,12 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
     return line_tokens
 
 
-def tokenize_lines(source_lines: Iterable[str]) -> List[List[Token]]:
+def tokenize_lines(source_lines: Iterable[str], skip_c=True) -> Iterable[List[Token]]:
     """
-    Takes a source file split into lines and tokeninzes it.
-    C code (lines which do not start with "#") are ignored.
+    Takes a source file split into lines and returns a generator that tokeninzes it.
+    If `skip_c` is true, C code (lines which do not start with "#") are ignored.
     """
-    pass
+    for i, line in enumerate(source_lines):
+        line_tokens = _tokenize_line(line, i)
+        if line_tokens or (not line_tokens and not skip_c):
+            yield line_tokens
