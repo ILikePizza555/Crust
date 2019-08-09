@@ -47,7 +47,7 @@ class TokenType(Enum):
 # List of 2-tuples, pairing the TokenType with a way to match it. Sorted in order of priority.
 TOKEN_MAP = (
     (TokenType.STRING,                  re.compile(r'^(".*")')),
-    (TokenType.FILENAME,                re.compile(r'^(<.*>)')),
+    (TokenType.FILENAME,                re.compile(r'^(<\s*\S*\s*>)')),
     (TokenType.INTEGER_CONST,           re.compile(r"^(\d+)")),
     (TokenType.CHAR_CONST,              re.compile(r"^('.')")),
     (TokenType.DEFINED,                 "defined"),
