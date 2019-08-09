@@ -39,9 +39,7 @@ test_data = [
     ]),
     ("Include statement", "#include <stdio.h>", 8, [
         Token(TokenType.DIRECTIVE, 8, 1, "include"),
-        Token(TokenType.LESS_THAN, 8, 9, "<"),
-        Token(TokenType.IDENTIFIER, 8, 10, "stdio.h"),
-        Token(TokenType.GREATER_THAN, 8, 17, ">")
+        Token(TokenType.FILENAME, 8, 9, "<stdio.h>")
     ])
 ]
 
