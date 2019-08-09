@@ -44,6 +44,7 @@ class TokenType(Enum):
     TOKEN_STRINGIFICATION = auto()
 
 
+# List of 2-tuples, pairing the TokenType with a way to match it. Sorted in order of priority.
 TOKEN_MAP = (
     (TokenType.STRING,                  re.compile(r'^(".*")')),
     (TokenType.FILENAME,                re.compile(r'^(<.*>)')),
@@ -79,12 +80,14 @@ def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
     if not line.startswith("#"):
         return None
 
+    # Tokenize the directive
     try:
         current_index = line.index(" ", 1)
         line_tokens = [Token(TokenType.DIRECTIVE, line_number, 1, line[1:current_index])]
     except ValueError:
         return [Token(TokenType.DIRECTIVE, line_number, 1, line[1:])]
 
+    # Tokenize the rest of the line
     while current_index < len(line):
         if line[current_index].isspace():
             current_index += 1
