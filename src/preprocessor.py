@@ -137,3 +137,51 @@ def tokenize_lines(source_lines: Iterable[str], skip_c=True) -> Iterable[List[To
             yield line_tokens
 
 
+class ImportTable(NamedTuple):
+    local: List[str] = []
+    system: List[str] = []
+
+    def append_entry(self, entry: Tuple[Optional[str], Optional[str]]):
+        if entry[0]:
+            self.local.append(entry[0])
+
+        if entry[1]:
+            self.system.append(entry[1])
+
+
+def _expect_token(tokens: List[Token], token_type: TokenType, pos: int = 0) -> Token:
+    peek = tokens[pos]
+    if peek.token_type is not token_type:
+        raise PreprocessorSyntaxError(peek.line, peek.col, f"Expected {token_type}")
+
+    return tokens.pop(0)
+
+
+def _parse_include(tokens: List[Token], macro_table={}):
+    peek = tokens[0]
+
+    if peek.token_type is TokenType.FILENAME:
+        tok = tokens.pop(0)
+        return (None, tok.text.strip("<> "))
+    elif peek.token_type is TokenType.STRING:
+        tok = tokens.pop(0)
+        return (tok.text.strip("\" "), None)
+    elif peek.token_type is TokenType.IDENTIFIER:
+        raise NotImplementedError("Macro resolution is not supported yet.")
+    else:
+        raise PreprocessorSyntaxError(peek.line, peek.col, "Expected a filename, string, or identifier.")s
+
+
+def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
+    if not macro_table:
+        macro_table = {}
+
+    imports = ImportTable()
+
+    for token_line in tokens:
+        directive = _expect_token(token_line, TokenType.DIRECTIVE)
+
+        if directive.text.upper() == "INCLUDE":
+            imports.append_entry(_parse_include(token_line, macro_table))
+
+    return (macro_table, imports)
