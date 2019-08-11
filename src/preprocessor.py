@@ -174,6 +174,43 @@ def _parse_include(tokens: List[Token], macro_table={}):
         raise PreprocessorSyntaxError(peek.line, peek.col, "Expected a filename, string, or identifier.")
 
 
+def _parse_identifier_list(tokens: List[Token]) -> List[Token]:
+    _expect_token(tokens, TokenType.LPARAN)
+
+    identifier_list = []
+
+    while tokens[0].token_type is not TokenType.RPARAN:
+        identifier_list.append(_expect_token(tokens, TokenType.IDENTIFIER))
+
+        if tokens[0].token_type is TokenType.COMMA:
+            tokens.pop(0)
+
+    # Consume the RPARAN
+    tokens.pop(0)
+
+    return identifier_list
+
+
+class Macro:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        macro_name = _expect_token(tokens, TokenType.IDENTIFIER).text
+        macro_params = None
+        macro_value = None
+
+        if tokens[0].token_type is TokenType.LPARAN:
+            id_list = _parse_identifier_list(tokens)
+            macro_params = [x.text for x in id_list]
+
+    def __init__(self, name, value, parameters=[]):
+        self.name = name
+        self.value = value
+        self.parameters = parameters
+
+    def __repr__(self):
+        return f"Macro(name={self.name}, parameters={self.parameters}, value={self.value}"
+
+
 def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
     if not macro_table:
         macro_table = {}
