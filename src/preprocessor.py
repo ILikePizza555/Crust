@@ -190,7 +190,7 @@ def run_file(file_string: str, macro_table=None):
     if macro_table is None:
         macro_table = {}
 
-    lines = file_string.splitlines()
+    lines = file_string.replace("\\\n", " ").splitlines()
     tokens = tokenize_lines(lines)
 
     return execute_tokens(tokens, macro_table)
