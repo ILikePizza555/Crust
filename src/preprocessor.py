@@ -148,11 +148,14 @@ class ImportTable(NamedTuple):
             self.system.append(entry[1])
 
 
+def _assert_token_type(token: Token, token_type: TokenType):
+    if token.token_type is not token_type:
+        raise PreprocessorSyntaxError(token.line, token.col, f"Expected {token_type}")
+
+
 def _expect_token(tokens: List[Token], token_type: TokenType, pos: int = 0) -> Token:
     peek = tokens[pos]
-    if peek.token_type is not token_type:
-        raise PreprocessorSyntaxError(peek.line, peek.col, f"Expected {token_type}")
-
+    _assert_token_type(peek, token_type)
     return tokens.pop(0)
 
 
