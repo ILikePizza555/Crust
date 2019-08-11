@@ -137,6 +137,10 @@ def tokenize_lines(source_lines: Iterable[str], skip_c=True) -> Iterable[List[To
 
 
 class ImportTable(NamedTuple):
+    """
+    A pair of lists containing the names of files the file imports.
+    The list in which the filename is contained defines the context.
+    """
     local: List[str] = []
     system: List[str] = []
 
@@ -192,6 +196,7 @@ def _parse_identifier_list(tokens: List[Token]) -> List[Token]:
 
 
 class Macro:
+    """Class representation of a Macro"""
     @classmethod
     def from_tokens(cls, tokens: List[Token]):
         macro_name = _expect_token(tokens, TokenType.IDENTIFIER).text
@@ -222,6 +227,8 @@ def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
 
         if directive.text.upper() == "INCLUDE":
             imports.append_entry(_parse_include(token_line, macro_table))
+        elif directive.text.upper() == "DEFINE":
+
 
     return (macro_table, imports)
 
