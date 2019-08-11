@@ -5,7 +5,7 @@ the purpose of this preprocessor is to determine the relationship between compil
 
 import re
 from enum import Enum, unique, auto
-from typing import Optional, List, NamedTuple, Iterable, Tuple
+from typing import Optional, List, NamedTuple, Iterable, Tuple, Either
 
 
 class UnknownTokenError(Exception):
@@ -195,6 +195,42 @@ def _parse_identifier_list(tokens: List[Token]) -> List[Token]:
     return identifier_list
 
 
+class CallExpression:
+    @classmethod
+    def from_tokens(cls, tokens):
+        calling_name = _expect_token(tokens, TokenType.IDENTIFIER).text
+        _expect_token(tokens, TokenType.LPARAN)
+
+        calling_arguments = []
+
+        while tokens[0].token_type is not TokenType.RPARAN:
+            peek: Token = tokens[0]
+
+            if peek.token_type is TokenType.INTEGER_CONST or peek.token_type is TokenType.CHAR_CONST:
+                calling_arguments.append(tokens.pop(0))
+                peek = None
+            elif peek.token_type is TokenType.IDENTIFIER and tokens[1].token_type is not TokenType.LPARAN:
+                calling_arguments.append(tokens.pop(0))
+                peek = None
+            elif peek.token_type is TokenType.IDENTIFIER and tokens[1].token_type is TokenType.LPARAN:
+                calling_arguments.append(CallExpression.from_tokens(tokens))
+            else:
+                raise PreprocessorSyntaxError(peek.line, peek.col, "Expected an expression")
+            
+            if tokens[0].token_type is TokenType.COMMA:
+                tokens.pop(0)
+            elif tokens[0].token_type is not TokenType.RPARAN:
+                raise PreprocessorSyntaxError(tokens[0].line, tokens[0].col, "Expected ',' or ')'")
+
+
+        tokens.pop(0)
+        return cls(calling_name, calling_arguments)
+
+    def __init__(self, name: str, arguments: list):
+        self.name = name
+        self.arguments = arguments
+
+
 class Macro:
     """Class representation of a Macro"""
     @classmethod
@@ -206,6 +242,14 @@ class Macro:
         if tokens[0].token_type is TokenType.LPARAN:
             id_list = _parse_identifier_list(tokens)
             macro_params = [x.text for x in id_list]
+
+        while tokens:
+            if len(tokens) >= 2 and tokens[0].token_type is TokenType.IDENTIFIER and tokens[1].token_type is TokenType.LPARAN:
+                macro_value.append(CallExpression.from_tokens(tokens))
+
+            macro_value.append(tokens.pop(0))
+
+        return cls(macro_name, macro_value, macro_params)
 
     def __init__(self, name, value, parameters=[]):
         self.name = name
@@ -228,7 +272,8 @@ def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
         if directive.text.upper() == "INCLUDE":
             imports.append_entry(_parse_include(token_line, macro_table))
         elif directive.text.upper() == "DEFINE":
-
+            new_macro = Macro.from_tokens(token_line)
+            macro_table[new_macro.name] = new_macro
 
     return (macro_table, imports)
 
