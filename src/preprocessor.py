@@ -4,9 +4,8 @@ the purpose of this preprocessor is to determine the relationship between compil
 """
 
 import re
-import string
 from enum import Enum, unique, auto
-from typing import Optional, List, NamedTuple, Iterable
+from typing import Optional, List, NamedTuple, Iterable, Tuple
 
 
 class UnknownTokenError(Exception):
