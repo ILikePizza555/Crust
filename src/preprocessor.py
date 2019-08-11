@@ -216,12 +216,11 @@ class CallExpression:
                 calling_arguments.append(CallExpression.from_tokens(tokens))
             else:
                 raise PreprocessorSyntaxError(peek.line, peek.col, "Expected an expression")
-            
+
             if tokens[0].token_type is TokenType.COMMA:
                 tokens.pop(0)
             elif tokens[0].token_type is not TokenType.RPARAN:
                 raise PreprocessorSyntaxError(tokens[0].line, tokens[0].col, "Expected ',' or ')'")
-
 
         tokens.pop(0)
         return cls(calling_name, calling_arguments)
