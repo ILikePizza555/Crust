@@ -169,7 +169,7 @@ def _parse_include(tokens: List[Token], macro_table={}):
     elif peek.token_type is TokenType.IDENTIFIER:
         raise NotImplementedError("Macro resolution is not supported yet.")
     else:
-        raise PreprocessorSyntaxError(peek.line, peek.col, "Expected a filename, string, or identifier.")s
+        raise PreprocessorSyntaxError(peek.line, peek.col, "Expected a filename, string, or identifier.")
 
 
 def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
@@ -185,3 +185,13 @@ def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
             imports.append_entry(_parse_include(token_line, macro_table))
 
     return (macro_table, imports)
+
+
+def run_file(file_string: str, macro_table=None):
+    if macro_table is None:
+        macro_table = {}
+
+    lines = file_string.splitlines()
+    tokens = tokenize_lines(lines)
+
+    return execute_tokens(tokens, macro_table)
