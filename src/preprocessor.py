@@ -5,7 +5,7 @@ the purpose of this preprocessor is to determine the relationship between compil
 
 import re
 from enum import Enum, unique, auto
-from typing import Optional, List, NamedTuple, Iterable, Tuple, Either
+from typing import Optional, List, NamedTuple, Iterable, Tuple
 
 
 class UnknownTokenError(Exception):
@@ -153,11 +153,16 @@ class ImportTable(NamedTuple):
 
 
 def _assert_token_type(token: Token, token_type: TokenType):
+    """Helper function that asserts the first token in the list is of the given type without removing it"""
     if token.token_type is not token_type:
         raise PreprocessorSyntaxError(token.line, token.col, f"Expected {token_type}")
 
 
 def _expect_token(tokens: List[Token], token_type: TokenType, pos: int = 0) -> Token:
+    """
+    Asserts that the `pos` token in the list is of `token_type`. 
+    If it is, it is removed from the list and returned
+    """
     peek = tokens[pos]
     _assert_token_type(peek, token_type)
     return tokens.pop(0)
