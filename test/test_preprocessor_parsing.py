@@ -2,14 +2,14 @@ import pytest # NOQA
 from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list
 
 PARSE_INCLUDE_TEST_DATA = [
-    ("system import", [Token(TokenType.FILENAME, 0, 0, "<stdio.h>")], (None, "stdio.h"))
+    ("system import", [Token(TokenType.FILENAME, 0, 0, "<stdio.h>")], (None, "stdio.h")),
     ("local import", [Token(TokenType.STRING, 0, 0, "\"local_file.h\"")], ("local_file.h", None))]
 
 
 @pytest.mark.parametrize(
     "tokens,expected",
-    [x[1:3] for x in PARSE_INCLUDE_TEST_DATA],
-    [x[0] for x in PARSE_INCLUDE_TEST_DATA]
+    argvalues=[x[1:3] for x in PARSE_INCLUDE_TEST_DATA],
+    ids=[x[0] for x in PARSE_INCLUDE_TEST_DATA]
 )
 def test_parse_include(tokens, expected):
     actual = _parse_include(tokens)
