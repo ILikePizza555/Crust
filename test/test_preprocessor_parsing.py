@@ -1,6 +1,9 @@
 import pytest # NOQA
 from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list
 
+TOK_LPARAN = Token(TokenType.LPARAN, 0, 0, "(")
+TOK_RPARAN = Token(TokenType.RPARAN, 0, 0, ")")
+
 PARSE_INCLUDE_TEST_DATA = [
     ("system import", [Token(TokenType.FILENAME, 0, 0, "<stdio.h>")], (None, "stdio.h")),
     ("local import", [Token(TokenType.STRING, 0, 0, "\"local_file.h\"")], ("local_file.h", None))]
@@ -25,14 +28,23 @@ def test_parse_include_with_macro_replacement():
     assert actual == (None, "stdio.h")
 
 
-def test_parse_identifier_list():
-    TOKENS = [
-        Token(TokenType.LPARAN, 0, 0, "("),
+IDLIST_TEST_DATA = [
+    ("Empty list", [], [Token(TokenType.LPARAN, 0, 0, "("), Token(TokenType.RPARAN, 0, 0, ")")]),
+    ("Two entry List", ["ID1", "ID2"], [
+        TOK_LPARAN,
         Token(TokenType.IDENTIFIER, 0, 0, "ID1"),
         Token(TokenType.COMMA, 0, 0, ","),
         Token(TokenType.IDENTIFIER, 0, 0, "ID2"),
-        Token(TokenType.RPARAN, 0, 0, ")")
-    ]
+        TOK_RPARAN
+    ])
+]
 
-    actual = _parse_identifier_list(TOKENS)
-    assert actual == ["ID1", "ID2"]
+
+@pytest.mark.parametrize(
+    "expected,tokens",
+    argvalues=[x[1:3] for x in IDLIST_TEST_DATA],
+    ids=[x[0] for x in IDLIST_TEST_DATA]
+)
+def test_parse_identifier_list(expected, tokens):
+    actual = _parse_identifier_list(tokens)
+    assert actual == expected
