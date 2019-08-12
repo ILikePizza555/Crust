@@ -1,5 +1,5 @@
 import pytest # NOQA
-from src.preprocessor import Token, TokenType, _parse_include
+from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list
 
 PARSE_INCLUDE_TEST_DATA = [
     ("system import", [Token(TokenType.FILENAME, 0, 0, "<stdio.h>")], (None, "stdio.h"))
@@ -23,3 +23,16 @@ def test_parse_include_with_macro_replacement():
 
     actual = _parse_include(TOKENS, MACRO_TABLE)
     assert actual == (None, "stdio.h")
+
+
+def test_parse_identifier_list():
+    TOKENS = [
+        Token(TokenType.LPARAN, 0, 0, "("),
+        Token(TokenType.IDENTIFIER, 0, 0, "ID1"),
+        Token(TokenType.COMMA, 0, 0, ","),
+        Token(TokenType.IDENTIFIER, 0, 0, "ID2"),
+        Token(TokenType.RPARAN, 0, 0, ")")
+    ]
+
+    actual = _parse_identifier_list(TOKENS)
+    assert actual == ["ID1", "ID2"]
