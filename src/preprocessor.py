@@ -160,7 +160,7 @@ def _assert_token_type(token: Token, token_type: TokenType):
 
 def _expect_token(tokens: List[Token], token_type: TokenType, pos: int = 0) -> Token:
     """
-    Asserts that the `pos` token in the list is of `token_type`. 
+    Asserts that the `pos` token in the list is of `token_type`.
     If it is, it is removed from the list and returned
     """
     peek = tokens[pos]
@@ -183,13 +183,13 @@ def _parse_include(tokens: List[Token], macro_table={}):
         raise PreprocessorSyntaxError(peek.line, peek.col, "Expected a filename, string, or identifier.")
 
 
-def _parse_identifier_list(tokens: List[Token]) -> List[Token]:
+def _parse_identifier_list(tokens: List[Token]) -> List[str]:
     _expect_token(tokens, TokenType.LPARAN)
 
     identifier_list = []
 
     while tokens[0].token_type is not TokenType.RPARAN:
-        identifier_list.append(_expect_token(tokens, TokenType.IDENTIFIER))
+        identifier_list.append(_expect_token(tokens, TokenType.IDENTIFIER).text)
 
         if tokens[0].token_type is TokenType.COMMA:
             tokens.pop(0)
@@ -244,8 +244,7 @@ class Macro:
         macro_value = None
 
         if tokens[0].token_type is TokenType.LPARAN:
-            id_list = _parse_identifier_list(tokens)
-            macro_params = [x.text for x in id_list]
+            macro_params = _parse_identifier_list(tokens)
 
         while tokens:
             if len(tokens) >= 2 and tokens[0].token_type is TokenType.IDENTIFIER and tokens[1].token_type is TokenType.LPARAN:
