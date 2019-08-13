@@ -1,5 +1,5 @@
 import pytest # NOQA
-from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list, CallExpression
+from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list, CallExpression, Macro
 
 TOK_LPARAN = Token(TokenType.LPARAN, 0, 0, "(")
 TOK_RPARAN = Token(TokenType.RPARAN, 0, 0, ")")
@@ -98,8 +98,28 @@ PARSE_CALLEXPR_TEST_DATA = [
 
 
 @pytest.mark.parametrize(
-    "expected,tokens"
+    "expected,tokens",
+    argvalues=[x[1:3] for x in PARSE_CALLEXPR_TEST_DATA],
+    ids=[x[0] for x in PARSE_CALLEXPR_TEST_DATA]
 )
 def test_parse_call_expression(expected, tokens):
     actual = CallExpression.from_tokens(tokens)
+    assert actual == expected
+
+
+PARSE_MACRO_TEST_DATA = [
+    ("Simple macro", Macro("TEST_MACRO", Token(TokenType.INTEGER_CONST, 0, 0, "1234")), [
+        Token(TokenType.IDENTIFIER, 0, 0, "TEST_MACRO"),
+        Token(TokenType.INTEGER_CONST, 0, 0, "1234")
+    ])
+]
+
+
+@pytest.mark.parametrize(
+    "expected,tokens",
+    argvalues=[x[1:3] for x in PARSE_MACRO_TEST_DATA],
+    ids=[x[0] for x in PARSE_MACRO_TEST_DATA]
+)
+def test_parse_macro(expected, tokens):
+    actual = Macro.from_tokens(tokens)
     assert actual == expected
