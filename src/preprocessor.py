@@ -260,7 +260,7 @@ class Macro:
 
         return cls(macro_name, macro_value, macro_params)
 
-    def __init__(self, name: str, value: Union[list, Token], parameters=[]):
+    def __init__(self, name: str, value: Union[list, Token], parameters: Optional[list] = None):
         self.name = name
         self.parameters = parameters
 
