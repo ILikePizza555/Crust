@@ -5,7 +5,7 @@ the purpose of this preprocessor is to determine the relationship between compil
 
 import re
 from enum import Enum, unique, auto
-from typing import Optional, List, NamedTuple, Iterable, Tuple
+from typing import Optional, List, NamedTuple, Iterable, Tuple, Union
 
 
 class UnknownTokenError(Exception):
@@ -260,10 +260,14 @@ class Macro:
 
         return cls(macro_name, macro_value, macro_params)
 
-    def __init__(self, name: str, value: list, parameters=[]):
+    def __init__(self, name: str, value: Union[list, Token], parameters=[]):
         self.name = name
-        self.value = value
         self.parameters = parameters
+
+        if type(value) is not list:
+            self.value: list = [value]
+        else:
+            self.value: list = value
 
     def __repr__(self):
         return f"Macro(name={self.name}, parameters={self.parameters}, value={self.value}"
