@@ -247,7 +247,7 @@ class Macro:
     def from_tokens(cls, tokens: List[Token]):
         macro_name = _expect_token(tokens, TokenType.IDENTIFIER).text
         macro_params = None
-        macro_value = None
+        macro_value = []
 
         if tokens[0].token_type is TokenType.LPARAN:
             macro_params = _parse_identifier_list(tokens)
