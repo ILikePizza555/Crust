@@ -234,6 +234,12 @@ class CallExpression:
         self.name = name
         self.arguments = arguments
 
+    def __repr__(self):
+        return f"CallExpression(name={self.name}, arguments={self.arguments})"
+
+    def __eq__(self, other):
+        return self.name == other.name and self.arguments == other.arguments
+
 
 class Macro:
     """Class representation of a Macro"""
