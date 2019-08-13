@@ -260,13 +260,16 @@ class Macro:
 
         return cls(macro_name, macro_value, macro_params)
 
-    def __init__(self, name, value, parameters=[]):
+    def __init__(self, name: str, value: list, parameters=[]):
         self.name = name
         self.value = value
         self.parameters = parameters
 
     def __repr__(self):
         return f"Macro(name={self.name}, parameters={self.parameters}, value={self.value}"
+
+    def __eq__(self, other):
+        return self.name == other.name and self.value == other.value and self.parameters == other.parameters
 
 
 def execute_tokens(tokens: Iterable[List[Token]], macro_table=None):
