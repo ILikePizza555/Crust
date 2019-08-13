@@ -1,8 +1,9 @@
 import pytest # NOQA
-from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list
+from src.preprocessor import Token, TokenType, _parse_include, _parse_identifier_list, CallExpression
 
 TOK_LPARAN = Token(TokenType.LPARAN, 0, 0, "(")
 TOK_RPARAN = Token(TokenType.RPARAN, 0, 0, ")")
+TOK_COMMA = Token(TokenType.COMMA, 0, 0, ",")
 
 PARSE_INCLUDE_TEST_DATA = [
     ("system import", [Token(TokenType.FILENAME, 0, 0, "<stdio.h>")], (None, "stdio.h")),
@@ -47,4 +48,58 @@ IDLIST_TEST_DATA = [
 )
 def test_parse_identifier_list(expected, tokens):
     actual = _parse_identifier_list(tokens)
+    assert actual == expected
+
+
+PARSE_CALLEXPR_TEST_DATA = [
+    ("No arguments", CallExpression("TEST_CALL", []), [
+        Token(TokenType.IDENTIFIER, 0, 0, "TEST_CALL"),
+        TOK_LPARAN,
+        TOK_RPARAN
+    ]),
+    ("One argument", CallExpression("TEST_CALL", [Token(TokenType.IDENTIFIER, 0, 0, "TEST_PARAM")]), [
+        Token(TokenType.IDENTIFIER, 0, 0, "TEST_CALL"),
+        TOK_LPARAN,
+        Token(TokenType.IDENTIFIER, 0, 0, "TEST_PARAM"),
+        TOK_RPARAN
+    ]),
+    ("Several arguments",
+        CallExpression("TEST_CALL", [
+                Token(TokenType.INTEGER_CONST, 0, 0, "42069"),
+                Token(TokenType.IDENTIFIER, 0, 0, "Trans Girls are good girls")
+            ]
+        ),
+        [
+            Token(TokenType.IDENTIFIER, 0, 0, "TEST_CALL"),
+            TOK_LPARAN,
+            Token(TokenType.INTEGER_CONST, 0, 0, "42069"),
+            TOK_COMMA,
+            Token(TokenType.IDENTIFIER, 0, 0, "Trans Girls are good girls"),
+            TOK_RPARAN
+        ]),
+    ("Nested calls", 
+        CallExpression("TEST_NESTED", [
+                Token(TokenType.CHAR_CONST, 0, 0, "'c'"),
+                CallExpression("TEST_NESTED2", [Token(TokenType.IDENTIFIER, 0, 0, "NESTED_ARG")])
+            ]
+        ),
+        [
+            Token(TokenType.IDENTIFIER, 0, 0, "TEST_NESTED"),
+            TOK_LPARAN,
+            Token(TokenType.CHAR_CONST, 0, 0, "'c'"),
+            TOK_COMMA,
+            Token(TokenType.IDENTIFIER, 0, 0, "TEST_NESTED2"),
+            TOK_LPARAN,
+            Token(TokenType.IDENTIFIER, 0, 0, "NESTED_ARG"),
+            TOK_RPARAN,
+            TOK_RPARAN
+        ])
+]
+
+
+@pytest.mark.parametrize(
+    "expected,tokens"
+)
+def test_parse_call_expression(expected, tokens):
+    actual = CallExpression.from_tokens(tokens)
     assert actual == expected
