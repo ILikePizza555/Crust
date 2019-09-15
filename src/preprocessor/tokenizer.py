@@ -82,4 +82,12 @@ def _tokenize_directive(cursor: StringCursor, line_number: int) -> Token:
     return Token(TokenType.DIRECTIVE, line_number, 1, directive_str[1:])
 
 
-def 
+def tokenize_file(file: str) -> List[Token]:
+    cursor = StringCursor(file)
+    return_tokens = []
+    line_counter = 0
+
+    while(not cursor.done()):
+
+
+    return return_tokens
