@@ -12,7 +12,7 @@ class UnknownTokenError(Exception):
         self.token = token
 
     def __str__(self):
-        return f"Unknown token \"{self.token}\" on line {self.line_number}, {self.column_number}"
+        return f"Unknown token \"{self.token}\" on line {self.line_number}: {self.column_number}"
 
 
 @unique
@@ -74,4 +74,5 @@ class Token(NamedTuple):
 
 
 def _tokenize_directive(cursor: StringCursor, line_numer: int) -> Token:
-    
+    if cursor.peak() != "#":
+        raise UnknownTokenError

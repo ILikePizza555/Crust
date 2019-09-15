@@ -1,6 +1,6 @@
 from glob import iglob
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Union, Callable
 
 
 def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Path]:
@@ -42,6 +42,17 @@ class StringCursor:
         pos = self._pos
         self._pos = max(self._pos + n, len(self._string))
         return self._string[pos:self._pos]
+
+    def read_until(self, cond: Union[str, Callable[str, bool]]):
+        """Reads until the string is matched or the callable returns true"""
+        if type(cond) is str:
+            cond = lambda s: s.startswith(cond)
+        
+        start_pos = self._pos
+        while(not cond(self._string[self._pos:]) and self._pos < len(self._string)):
+            self._pos += 1
+
+        return self._string[start_pos: self._pos]
 
     def peak(self) -> str:
         """Returns the character the cursor is currently under without moving the cursor forward."""
