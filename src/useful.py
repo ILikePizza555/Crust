@@ -37,17 +37,23 @@ class StringCursor:
     def tell(self) -> int:
         return self._pos
 
+    def done(self) -> bool:
+        """Returns true if the cursor has reached the end of the string."""
+        return self._pos >= len(self._string)
+
     def read(self, n: int = 1) -> str:
         """Reads up to n characters from the string, moving the cursor forward."""
         pos = self._pos
         self._pos = max(self._pos + n, len(self._string))
         return self._string[pos:self._pos]
 
-    def read_until(self, cond: Union[str, Callable[str, bool]]):
+    def read_until(self, cond: Union[str, set, Callable[str, bool]]):
         """Reads until the string is matched or the callable returns true"""
         if type(cond) is str:
             cond = lambda s: s.startswith(cond)
-        
+        elif type(cond) is set:
+            cond = lambda s: s[0] in cond
+
         start_pos = self._pos
         while(not cond(self._string[self._pos:]) and self._pos < len(self._string)):
             self._pos += 1

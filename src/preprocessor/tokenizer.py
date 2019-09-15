@@ -1,5 +1,6 @@
 import re
-from enum import Enum, unique, auto
+import string
+from enum import Tuple, Enum, unique, auto
 from typing import NamedTuple
 from ..useful import StringCursor
 
@@ -73,6 +74,12 @@ class Token(NamedTuple):
     text: str
 
 
-def _tokenize_directive(cursor: StringCursor, line_numer: int) -> Token:
+def _tokenize_directive(cursor: StringCursor, line_number: int) -> Token:
     if cursor.peak() != "#":
-        raise UnknownTokenError
+        raise UnknownTokenError(line_number, 0, cursor.peak())
+
+    directive_str = cursor.read_until(set(string.whitespace))
+    return Token(TokenType.DIRECTIVE, line_number, 1, directive_str[1:])
+
+
+def 
