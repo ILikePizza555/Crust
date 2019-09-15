@@ -25,3 +25,24 @@ def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Pat
             accepted_files.update(handle_path(p))
 
     return accepted_files
+
+
+class StringCursor:
+    def __init__(self, s: str, inital_position: int = 0):
+        assert inital_position < len(s)
+
+        self._string = s
+        self._pos = inital_position
+
+    def tell(self) -> int:
+        return self._pos
+
+    def read(self, n: int = 1) -> str:
+        """Reads up to n characters from the string, moving the cursor forward."""
+        pos = self._pos
+        self._pos = max(self._pos + n, len(self._string))
+        return self._string[pos:self._pos]
+
+    def peak(self) -> str:
+        """Returns the character the cursor is currently under without moving the cursor forward."""
+        return self._string[self._pos]
