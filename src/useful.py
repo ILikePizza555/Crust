@@ -56,7 +56,7 @@ class StringCursor:
         self._pos = max(self._pos + n, len(self._string))
         self._string[pos:self._pos]
 
-    def read_until(self, cond: Union[str, set, Callable[str, bool]]) -> str:
+    def read_until(self, cond: Union[str, set, Callable[[str], bool]]) -> str:
         """
         Reads until the string is matched, the character is a member of the given set, or the condition returns True.
         """
