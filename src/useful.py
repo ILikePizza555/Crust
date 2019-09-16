@@ -1,3 +1,4 @@
+import re
 from glob import iglob
 from pathlib import Path
 from typing import Iterable, Union, Callable
@@ -34,6 +35,10 @@ class StringCursor:
         self._string = s
         self._pos = inital_position
 
+    @property
+    def unread_slice(self):
+        return self._string[self._pos:]
+
     def tell(self) -> int:
         return self._pos
 
@@ -45,9 +50,9 @@ class StringCursor:
         """Reads up to n characters from the string, moving the cursor forward."""
         pos = self._pos
         self._pos = max(self._pos + n, len(self._string))
-        return self._string[pos:self._pos]
+        return self.unread_slice
 
-    def read_until(self, cond: Union[str, set, Callable[str, bool]]):
+    def read_until(self, cond: Union[str, set, Callable[str, bool]]) -> str:
         """Reads until the string is matched or the callable returns true"""
         if type(cond) is str:
             cond = lambda s: s.startswith(cond)
@@ -55,10 +60,26 @@ class StringCursor:
             cond = lambda s: s[0] in cond
 
         start_pos = self._pos
-        while(not cond(self._string[self._pos:]) and self._pos < len(self._string)):
+        while(not cond(self.unread_slice) and self._pos < len(self._string)):
             self._pos += 1
 
         return self._string[start_pos: self._pos]
+
+    def read_match(self, pattern) -> str:
+        """
+        If a match beginning at the cursor is found, read_match moves the cursor forward the length of the match and returns the match object.
+        If no match is found, None is returned
+        """
+
+        if isinstance(pattern, re.Pattern):
+            match = pattern.match(self.unread_slice)
+        else:
+            match = re.match(pattern, self.unread_slice)
+
+        if match:
+            self.read(len(match.group()))
+
+        return match
 
     def peak(self) -> str:
         """Returns the character the cursor is currently under without moving the cursor forward."""
