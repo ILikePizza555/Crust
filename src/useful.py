@@ -1,7 +1,7 @@
 import re
 from glob import iglob
 from pathlib import Path
-from typing import Iterable, Union, Callable
+from typing import Iterable, Union, Callable, Optional
 
 
 def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Path]:
@@ -69,7 +69,7 @@ class StringCursor:
 
         return self._string[start_pos: self._pos]
 
-    def read_match(self, pattern) -> str:
+    def read_match(self, pattern) -> Optional[re.Match]:
         """
         If a match beginning at the cursor is found, read_match moves the cursor forward the length of the match and returns the match object.
         If no match is found, None is returned
