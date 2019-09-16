@@ -48,10 +48,10 @@ def test_read_until(cursor: StringCursor, condition, expected_str, expected_pos)
     argvalues=[
         (StringCursor("foobar"), "foo", "foo", 3),
         (StringCursor("foobar"), "bar", None, 0),
-        (StringCursor("foobar", 3), "bar", "bar", 5),
-        (StringCursor("ababac"), re.compile(r"[ab]*c"), "ababac", 5),
-        (StringCursor("ababac", 3), re.compile(r"[ab]*c"), "bac", 5),
-        (StringCursor("cababac"), re.compile(r"[ab]*c"), None, 0)
+        (StringCursor("foobar", 3), "bar", "bar", 6),
+        (StringCursor("ababac"), re.compile(r"[ab]+c"), "ababac", 6),
+        (StringCursor("ababac", 3), re.compile(r"[ab]+c"), "bac", 6),
+        (StringCursor("cababac"), re.compile(r"[ab]+c"), None, 0)
     ],
     ids=[
         "String match",
