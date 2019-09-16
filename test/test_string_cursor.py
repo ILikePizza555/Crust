@@ -7,8 +7,8 @@ from src.useful import StringCursor
     "cursor,n_value,expected_str,expected_pos",
     argvalues=[
         (StringCursor("abcaabbc"), 5, "abcaa", 5),
-        (StringCursor("abcaabbc", 2), 5, "aabbc", 8),
-        (StringCursor("abcaabbc", 4), 5, "bbc", 8)
+        (StringCursor("abcaabbc", 3), 5, "aabbc", 8),
+        (StringCursor("abcaabbc", 5), 5, "bbc", 8)
     ],
     ids=["Normal read", "Given a starting position", "N-value exceeding length of string"]
 )
@@ -50,7 +50,7 @@ def test_read_until(cursor: StringCursor, condition, expected_str, expected_pos)
         (StringCursor("foobar"), "bar", None, 0),
         (StringCursor("foobar", 3), "bar", "bar", 5),
         (StringCursor("ababac"), re.compile(r"[ab]*c"), "ababac", 5),
-        (StringCursor("ababac", 2), re.compile(r"[ab]*c"), "bac", 5),
+        (StringCursor("ababac", 3), re.compile(r"[ab]*c"), "bac", 5),
         (StringCursor("cababac"), re.compile(r"[ab]*c"), None, 0)
     ],
     ids=[
