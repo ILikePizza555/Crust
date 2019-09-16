@@ -54,7 +54,7 @@ class StringCursor:
         """Reads up to n characters from the string, moving the cursor forward."""
         pos = self._pos
         self._pos = max(self._pos + n, len(self._string))
-        return self.unread_slice
+        self._string[pos:self._pos]
 
     def read_until(self, cond: Union[str, set, Callable[str, bool]]) -> str:
         """Reads until the string is matched or the callable returns true"""
@@ -85,6 +85,9 @@ class StringCursor:
 
         return match
 
-    def peak(self) -> str:
-        """Returns the character the cursor is currently under without moving the cursor forward."""
-        return self._string[self._pos]
+    def peak(self, n: int = 1) -> str:
+        """
+        Returns the n characters the cursor is under without moving the cursor forward.
+        """
+        n = max(self._pos + n, len(self._string))
+        return self._string[self._pos:n]
