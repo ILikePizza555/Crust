@@ -29,6 +29,12 @@ def normalize_path(path: Union[str, Iterable[Union[Path, str]]]) -> Iterable[Pat
 
 
 class StringCursor:
+    """
+    Maintains a cursor on a string.
+
+    The cursor represents the characters that have yet to be read. 
+    (i.e if the cursor is on index 2, then the character at index 2 has not been read yet)
+    """
     def __init__(self, s: str, inital_position: int = 0):
         assert inital_position < len(s)
 
