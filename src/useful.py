@@ -57,7 +57,9 @@ class StringCursor:
         self._string[pos:self._pos]
 
     def read_until(self, cond: Union[str, set, Callable[str, bool]]) -> str:
-        """Reads until the string is matched or the callable returns true"""
+        """
+        Reads until the string is matched, the character is a member of the given set, or the condition returns True.
+        """
         if type(cond) is str:
             cond = lambda s: s.startswith(cond)
         elif type(cond) is set:
