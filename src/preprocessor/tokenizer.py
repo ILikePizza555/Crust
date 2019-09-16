@@ -87,9 +87,11 @@ def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
         match = cursor.read_match(matcher)
 
         if match:
-            token_str = match
-            column = cursor.position - len(match.group())
-            return Token(token_type, line_number, column, )
+            token_str = match.group()
+            column = cursor.position - len(token_str)
+            return Token(token_type, line_number, column, token_str)
+    
+    raise UnknownTokenError(line_number, cursor.position, cursor.unread_slice)
 
 
 def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], int]:
