@@ -74,13 +74,38 @@ class Token(NamedTuple):
     text: str
 
 
-def _tokenize_directive(cursor: StringCursor, line_number: int) -> Token:
+def _tokenize_directive(cursor: StringCursor, line_number: int) -> Optional[Token]:
     if cursor.peak() != "#":
         raise UnknownTokenError(line_number, 0, cursor.peak())
 
     directive_str = cursor.read_until(set(string.whitespace))
     return Token(TokenType.DIRECTIVE, line_number, 1, directive_str[1:])
 
+
+def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
+    for token_type, matcher in TOKEN_MAP:
+        match = cursor.read_match(matcher)
+
+        if match:
+            return Token(token_type, line_number, cursor.)
+
+
+def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], int]:
+    """Tokenizes a line, following escaped newlines. Returns the tokens and the number of lines read"""
+    line_offset = 1
+    return_tokens = []
+
+    try:
+        return_tokens.append(_tokenize_directive(cursor, line_number))
+    except UnknownTokenError:
+        cursor.read_until("\n")
+    
+    while(cursor.peak() != "\n" and not cursor.done()):
+        cursor.read_until(lambda s: s[0] not in set(string.whitespace))
+
+
+
+    return (return_tokens, line_offset)
 
 def tokenize_file(file: str) -> List[Token]:
     cursor = StringCursor(file)

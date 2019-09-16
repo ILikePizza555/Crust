@@ -36,8 +36,12 @@ class StringCursor:
         self._pos = inital_position
 
     @property
-    def unread_slice(self):
+    def unread_slice(self) -> str:
         return self._string[self._pos:]
+
+    @property
+    def position(self) -> int:
+        return self._pos
 
     def tell(self) -> int:
         return self._pos
