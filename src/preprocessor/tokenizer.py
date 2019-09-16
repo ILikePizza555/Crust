@@ -1,6 +1,6 @@
 import re
 import string
-from enum import Tuple, Enum, unique, auto
+from enum import List, Optional, Tuple, Enum, unique, auto
 from typing import NamedTuple
 from ..useful import StringCursor
 
@@ -90,33 +90,40 @@ def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
             token_str = match.group()
             column = cursor.position - len(token_str)
             return Token(token_type, line_number, column, token_str)
-    
+
     raise UnknownTokenError(line_number, cursor.position, cursor.unread_slice)
 
 
 def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], int]:
     """Tokenizes a line, following escaped newlines. Returns the tokens and the number of lines read"""
-    line_offset = 1
+    line_offset = 0
     return_tokens = []
 
     try:
         return_tokens.append(_tokenize_directive(cursor, line_number))
     except UnknownTokenError:
         cursor.read_until("\n")
-    
+
     while(cursor.peak() != "\n" and not cursor.done()):
         cursor.read_until(lambda s: s[0] not in set(string.whitespace))
 
+        return_tokens.append(_read_next_token(cursor, line_number + line_offset))
+
+        if cursor.peak(2) == "\\n":
+            cursor.read(2)
+            line_offset += 1
+
+    return (return_tokens, line_offset + 1)
 
 
-    return (return_tokens, line_offset)
-
-def tokenize_file(file: str) -> List[Token]:
+def tokenize_file(file: str) -> List[List[Token]]:
     cursor = StringCursor(file)
     return_tokens = []
     line_counter = 0
 
     while(not cursor.done()):
-
+        tokens, lines = tokenize_line(cursor, line_counter)
+        return_tokens.append(tokens)
+        line_counter += lines
 
     return return_tokens

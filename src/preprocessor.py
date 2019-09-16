@@ -5,10 +5,6 @@ the purpose of this preprocessor is to determine the relationship between compil
 
 from typing import Optional, List, NamedTuple, Iterable, Tuple, Union
 
-
-
-
-
 class PreprocessorSyntaxError(Exception):
     def __init__(self, line_number, column_number, message):
         self.line_number = line_number
@@ -17,47 +13,6 @@ class PreprocessorSyntaxError(Exception):
 
     def __str__(self):
         return f"Syntax error on line {self.line_number}, {self.column_number}: {self.message}"
-
-
-
-def _tokenize_line(line: str, line_number: int) -> Optional[List[Token]]:
-    if not line.startswith("#"):
-        return None
-
-    # Tokenize the directive
-    try:
-        current_index = line.index(" ", 1)
-        line_tokens = [Token(TokenType.DIRECTIVE, line_number, 1, line[1:current_index])]
-    except ValueError:
-        return [Token(TokenType.DIRECTIVE, line_number, 1, line[1:])]
-
-    # Tokenize the rest of the line
-    while current_index < len(line):
-        if line[current_index].isspace():
-            current_index += 1
-            continue
-
-        token = None
-
-        for token_type, matcher in TOKEN_MAP:
-            if type(matcher) is str:
-                if line.startswith(matcher, current_index):
-                    token = Token(token_type, line_number, current_index, matcher)
-                    break
-            else:
-                line_slice = line[current_index:]
-                re_match = matcher.match(line_slice)
-                if re_match:
-                    token = Token(token_type, line_number, current_index, re_match.group(0))
-                    break
-
-        if token:
-            line_tokens.append(token)
-            current_index += len(token.text)
-        else:
-            raise UnknownTokenError(line_number, current_index, line[current_index])
-
-    return line_tokens
 
 
 def tokenize_lines(source_lines: Iterable[str], skip_c=True) -> Iterable[List[Token]]:
