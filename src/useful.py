@@ -54,7 +54,7 @@ class StringCursor:
         """Reads up to n characters from the string, moving the cursor forward."""
         pos = self._pos
         self._pos = min(self._pos + n, len(self._string))
-        self._string[pos:self._pos]
+        return self._string[pos:self._pos]
 
     def read_until(self, cond: Union[str, set, Callable[[str], bool]]) -> str:
         """
