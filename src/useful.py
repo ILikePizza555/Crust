@@ -67,9 +67,11 @@ class StringCursor:
         Reads until the string is matched, the character is a member of the given set, or the condition returns True.
         """
         if type(cond) is str:
-            cond = lambda s: s.startswith(cond) # NOQA
+            pattern = cond
+            cond = lambda s: s.startswith(pattern) # NOQA
         elif type(cond) is set:
-            cond = lambda s: s[0] in cond # NOQA
+            match_set = cond
+            cond = lambda s: s[0] in match_set # NOQA
 
         start_pos = self._pos
         while(not cond(self.unread_slice) and self._pos < len(self._string)):
