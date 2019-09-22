@@ -85,3 +85,18 @@ def test_tokenize_line(line_str, line_number, expected):
 
     actual, line_offset = tokenize_line(cursor, line_number)
     assert actual == expected
+
+
+def test_tokenize_line_escaped_line_endings():
+    cursor = StringCursor("#define TEST_LIST a, \\\n\tb \\\n\tc\n")
+    actual, line_offset = tokenize_line(cursor, 0)
+
+    assert actual == [
+        Token(TokenType.DIRECTIVE, 0, 1, "define"),
+        Token(TokenType.IDENTIFIER, 0, 8, "TEST_LIST"),
+        Token(TokenType.IDENTIFIER, 0, 17, "a"),
+        Token(TokenType.COMMA, 0, 18, ","),
+        Token(TokenType.IDENTIFIER, 0, 20, "b"),
+        Token(TokenType.COMMA, 0, 21, ","),
+        Token(TokenType.COMMA, 0, 23, "c")]
+    assert line_offset == 3
