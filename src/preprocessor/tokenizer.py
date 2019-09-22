@@ -96,7 +96,7 @@ def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
 
 
 def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], int]:
-    """Tokenizes a line, following escaped newlines. Returns the tokens and the number of lines read"""
+    """Tokenizes a logical line, following escaped newlines. Returns the tokens and the number of lines read"""
     line_offset = 0
     return_tokens = []
 
