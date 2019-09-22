@@ -1,7 +1,7 @@
 import re
 import string
-from enum import List, Optional, Tuple, Enum, unique, auto
-from typing import NamedTuple
+from enum import Enum, unique, auto
+from typing import NamedTuple, List, Optional, Tuple
 from ..useful import StringCursor
 
 
@@ -83,6 +83,7 @@ def _tokenize_directive(cursor: StringCursor, line_number: int) -> Optional[Toke
 
 
 def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
+    """Reads a token from cursor. Assumes the cursor is currently on a non-whitespace character."""
     for token_type, matcher in TOKEN_MAP:
         match = cursor.read_match(matcher)
 

@@ -1,9 +1,31 @@
 import pytest # NOQA
-from src.preprocessor import _tokenize_line, Token, TokenType
+from src.preprocessor.tokenizer import tokenize_line, Token, TokenType, _tokenize_directive, UnknownTokenError
+from src.useful import StringCursor
+
+
+def test_tokenize_directive_valid_input():
+    cursor = StringCursor("#include <iostream>")
+    actual = _tokenize_directive(cursor, 0)
+
+    assert actual == Token(TokenType.DIRECTIVE, 0, 1, "include")
+    assert cursor.position == 8
+
+
+def test_tokenize_directive_null():
+    cursor = StringCursor("# the rest of this should not be read")
+    actual = _tokenize_directive(cursor, 0)
+
+    assert actual == Token(TokenType.DIRECTIVE, 0, 1, "")
+    assert cursor.position == 1
+
+
+def test_tokenize_directive_error():
+    cursor = StringCursor("this input throws an error")
+    with pytest.raises(UnknownTokenError):
+        _tokenize_directive(cursor, 0)
 
 
 test_data = [
-    ("Empty String", "", 0, None),
     ("Null directive", "#", 0, [Token(TokenType.DIRECTIVE, 0, 1, "")]),
     ("No parameter directive", "#pragma", 0, [Token(TokenType.DIRECTIVE, 0, 1, "pragma")]),
     ("Integer constant", "#define TEST_INT 1234", 4, [
@@ -55,9 +77,11 @@ test_data = [
 
 
 @pytest.mark.parametrize(
-    "line_str,line_num,expected",
+    "line_str,line_number,expected",
     argvalues=[x[1:4] for x in test_data],
     ids=[x[0] for x in test_data])
-def test_tokenizer(line_str, line_num, expected):
-    actual = _tokenize_line(line_str, line_num)
+def test_tokenize_line(line_str, line_number, expected):
+    cursor = StringCursor(line_str)
+
+    actual, line_offset = tokenize_line(cursor, line_number)
     assert actual == expected
