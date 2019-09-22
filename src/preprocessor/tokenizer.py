@@ -53,7 +53,7 @@ TOKEN_MAP = (
     (TokenType.GREATER_THAN_OR_EQUAL,   re.compile(r">=")),
     (TokenType.EQUAL,                   re.compile(r"==")),
     (TokenType.AND,                     re.compile(r"&&")),
-    (TokenType.OR,                      re.compile(r"||")),
+    (TokenType.OR,                      re.compile(r"\|\|")),
     (TokenType.TOKEN_CONCATINATION,     re.compile(r"##")),
     (TokenType.LPARAN,                  re.compile(r"\(")),
     (TokenType.RPARAN,                  re.compile(r"\)")),
