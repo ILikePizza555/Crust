@@ -26,19 +26,19 @@ def test_tokenize_directive_error():
 
 
 test_data = [
-    ("Null directive", "#", 0, [Token(TokenType.DIRECTIVE, 0, 1, "")]),
-    ("No parameter directive", "#pragma", 0, [Token(TokenType.DIRECTIVE, 0, 1, "pragma")]),
-    ("Integer constant", "#define TEST_INT 1234", 4, [
+    ("Null directive", "#\n", 0, [Token(TokenType.DIRECTIVE, 0, 1, "")]),
+    ("No parameter directive", "#pragma\n", 0, [Token(TokenType.DIRECTIVE, 0, 1, "pragma")]),
+    ("Integer constant", "#define TEST_INT 1234\n", 4, [
         Token(TokenType.DIRECTIVE, 4, 1, "define"),
         Token(TokenType.IDENTIFIER, 4, 8, "TEST_INT"),
         Token(TokenType.INTEGER_CONST, 4, 17, "1234")
     ]),
-    ("Character constant", "#define TEST_CHAR 's'", 5, [
+    ("Character constant", "#define TEST_CHAR 's'\n", 5, [
         Token(TokenType.DIRECTIVE, 5, 1, "define"),
         Token(TokenType.IDENTIFIER, 5, 8, "TEST_CHAR"),
         Token(TokenType.CHAR_CONST, 5, 18, "'s'")
     ]),
-    ("Function macro", "#define FMACRO(name) typedef struct name##_s name##_t", 6, [
+    ("Function macro", "#define FMACRO(name) typedef struct name##_s name##_t\n", 6, [
         Token(TokenType.DIRECTIVE, 6, 1, "define"),
         Token(TokenType.IDENTIFIER, 6, 8, "FMACRO"),
         Token(TokenType.LPARAN, 6, 14, "("),
@@ -53,17 +53,17 @@ test_data = [
         Token(TokenType.TOKEN_CONCATINATION, 6, 49, "##"),
         Token(TokenType.IDENTIFIER, 6, 51, "_t")
     ]),
-    ("Conditional statement", "#if X <= 5", 7, [
+    ("Conditional statement", "#if X <= 5\n", 7, [
         Token(TokenType.DIRECTIVE, 7, 1, "if"),
         Token(TokenType.IDENTIFIER, 7, 4, "X"),
         Token(TokenType.LESS_THAN_OR_EQUAL, 7, 6, "<="),
         Token(TokenType.INTEGER_CONST, 7, 9, "5")
     ]),
-    ("Include statement", "#include <stdio.h>", 8, [
+    ("Include statement", "#include <stdio.h>\n", 8, [
         Token(TokenType.DIRECTIVE, 8, 1, "include"),
         Token(TokenType.FILENAME, 8, 9, "<stdio.h>")
     ]),
-    ("Conditionals aren't files", "#pragma 34 <= TEST_1 || TEST_2 > 55", 9, [
+    ("Conditionals aren't files", "#pragma 34 <= TEST_1 || TEST_2 > 55\n", 9, [
         Token(TokenType.DIRECTIVE, 9, 1, "pragma"),
         Token(TokenType.INTEGER_CONST, 9, 8, "34"),
         Token(TokenType.LESS_THAN_OR_EQUAL, 9, 11, "<="),
