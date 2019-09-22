@@ -1,4 +1,5 @@
 import re
+import string
 from glob import iglob
 from pathlib import Path
 from typing import Iterable, Union, Callable, Optional
@@ -101,3 +102,7 @@ class StringCursor:
         """
         n = min(self._pos + n, len(self._string))
         return self._string[self._pos:n]
+
+    @staticmethod
+    def read_whitespace(inst: "StringCursor"):
+        return inst.read_until(lambda s: s[0] not in set(string.whitespace))
