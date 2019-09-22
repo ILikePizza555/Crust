@@ -5,26 +5,6 @@ the purpose of this preprocessor is to determine the relationship between compil
 
 from typing import Optional, List, NamedTuple, Iterable, Tuple, Union
 
-class PreprocessorSyntaxError(Exception):
-    def __init__(self, line_number, column_number, message):
-        self.line_number = line_number
-        self.column_number = column_number
-        self.message = message
-
-    def __str__(self):
-        return f"Syntax error on line {self.line_number}, {self.column_number}: {self.message}"
-
-
-def tokenize_lines(source_lines: Iterable[str], skip_c=True) -> Iterable[List[Token]]:
-    """
-    Takes a source file split into lines and returns a generator that tokeninzes it.
-    If `skip_c` is true, C code (lines which do not start with "#") are ignored.
-    """
-    for i, line in enumerate(source_lines):
-        line_tokens = _tokenize_line(line, i)
-        if line_tokens or (not line_tokens and not skip_c):
-            yield line_tokens
-
 
 class ImportTable(NamedTuple):
     """
