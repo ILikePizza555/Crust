@@ -75,9 +75,7 @@ class StringCursor:
             cond = lambda s: s[0] in match_set # NOQA
 
         start_pos = self._pos
-        while(len(self.unread_slice) != 0 and
-              not cond(self.unread_slice) and
-              self._pos < len(self._string)):
+        while(not cond(self.unread_slice) and self._pos < len(self._string)):
             self._pos += 1
 
         return self._string[start_pos: self._pos]
@@ -107,4 +105,5 @@ class StringCursor:
 
     @staticmethod
     def read_whitespace(inst: "StringCursor"):
-        return inst.read_until(lambda s: s[0] not in set(string.whitespace))
+        if not inst.done:
+            return inst.read_until(lambda s: s[0] not in set(string.whitespace))
