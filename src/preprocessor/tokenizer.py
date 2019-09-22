@@ -41,6 +41,16 @@ class TokenType(Enum):
     TOKEN_STRINGIFICATION = auto()
 
 
+VALUE_TOKENS = {
+    TokenType.IDENTIFIER, TokenType.CHAR_CONST, TokenType.INTEGER_CONST, TokenType.STRING
+}
+
+COMPARISON_OP_TOKENS = {
+    TokenType.EQUAL, TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL,
+    TokenType.LESS_THAN, TokenType.GREATER_THAN
+}
+
+
 # List of 2-tuples, pairing the TokenType with a way to match it. Sorted in order of priority.
 TOKEN_MAP = (
     (TokenType.STRING,                  re.compile(r'^(".*")')),
