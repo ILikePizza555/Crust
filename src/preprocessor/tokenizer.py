@@ -106,11 +106,11 @@ def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], 
         cursor.read_until("\n")
 
     while(cursor.peak() != "\n" and not cursor.done()):
-        cursor.read_until(lambda s: s[0] not in set(string.whitespace))
-
+        StringCursor.read_whitespace(cursor)
         return_tokens.append(_read_next_token(cursor, line_number + line_offset))
+        StringCursor.read_whitespace(cursor)
 
-        if cursor.peak(2) == "\\n":
+        if cursor.peak(2) == "\\\n":
             cursor.read(2)
             line_offset += 1
 
