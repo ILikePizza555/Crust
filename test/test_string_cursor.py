@@ -26,7 +26,8 @@ def test_read(cursor: StringCursor, n_value, expected_str, expected_pos):
         (StringCursor("foobar"), set("bar"), "foo", 3),
         (StringCursor("foobar"), set("foo"), "", 0),
         (StringCursor("foobbar"), "bar", "foob", 4),
-        (StringCursor("foobar"), lambda s: True, "", 0)
+        (StringCursor("foobar"), lambda s: True, "", 0),
+        (StringCursor("foobar"), lambda s: s[0] == "p", "foobar", 6)
     ],
     ids=[
         "until string",
@@ -35,7 +36,8 @@ def test_read(cursor: StringCursor, n_value, expected_str, expected_pos):
         "until set",
         "until set starting on char",
         "until string matching string",
-        "until lambda"
+        "until lambda",
+        "bounds check done before cond"
     ]
 )
 def test_read_until(cursor: StringCursor, condition, expected_str, expected_pos):
