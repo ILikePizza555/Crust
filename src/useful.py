@@ -75,7 +75,9 @@ class StringCursor:
             cond = lambda s: s[0] in match_set # NOQA
 
         start_pos = self._pos
-        while(not cond(self.unread_slice) and self._pos < len(self._string)):
+        while(len(self.unread_slice) != 0 and
+              not cond(self.unread_slice) and
+              self._pos < len(self._string)):
             self._pos += 1
 
         return self._string[start_pos: self._pos]
