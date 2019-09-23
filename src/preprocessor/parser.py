@@ -146,7 +146,38 @@ class ObjectMacro:
         remainder = tokens[1:]
 
         return cls(name_token, remainder)
-    
+
     def __init__(self, identifier: Token, value: List[Token]):
         self.identifier = identifier
         self.value = value
+
+
+class FunctionMacro:
+    """
+    Class representation of a function macro
+    """
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        """
+        Parses the following syntax:
+        IDENTIFIER (IDENTIFIER [, IDENTIFIER]*) TOKENS*
+        """
+        identifier = _expect_token(tokens, set(TokenType.IDENTIFIER))
+        _expect_token(tokens, set(TokenType.LPARAN))
+        parameters = []
+
+        try:
+            while tokens[0].token_type is not TokenType.RPARAN:
+                parameters.append(_expect_token(tokens, set(TokenType.IDENTIFIER)))
+                _expect_token(tokens, set(TokenType.COMMA))
+        except IndexError:
+            raise PreprocessorSyntaxError(identifier.line, 0, "Invalid syntax")
+
+        remainder = tokens[1 + len(parameters):]
+
+        return cls(identifier, parameters, remainder)
+
+    def __init__(self, identifier: Token, parameters: List[Token], remainder: List[Token]):
+        self.identifier = identifier
+        self.parameters = parameters
+        self.remainder = remainder
