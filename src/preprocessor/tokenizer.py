@@ -29,6 +29,7 @@ class TokenType(Enum):
     LESS_THAN_OR_EQUAL = auto()
     GREATER_THAN_OR_EQUAL = auto()
     EQUAL = auto()
+    NOT_EQUAL = auto()
     AND = auto()
     OR = auto()
     TOKEN_CONCATINATION = auto()
@@ -42,14 +43,18 @@ class TokenType(Enum):
 
 
 VALUE_TOKENS = {
-    TokenType.IDENTIFIER, TokenType.CHAR_CONST, TokenType.INTEGER_CONST, TokenType.STRING
+    TokenType.IDENTIFIER, TokenType.CHAR_CONST, TokenType.INTEGER_CONST
 }
 
-COMPARISON_OP_TOKENS = {
-    TokenType.EQUAL, TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL,
-    TokenType.LESS_THAN, TokenType.GREATER_THAN
+RTL_OPS = {
+    TokenType.NOT, TokenType.DEFINED
 }
 
+OPERATOR_TOKENS = {
+    TokenType.NOT, TokenType.DEFINED, TokenType.EQUAL, TokenType.NOT_EQUAL,
+    TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL, TokenType.GREATER_THAN,
+    TokenType.LESS_THAN
+}
 
 # List of 2-tuples, pairing the TokenType with a way to match it. Sorted in order of priority.
 TOKEN_MAP = (
@@ -62,6 +67,7 @@ TOKEN_MAP = (
     (TokenType.LESS_THAN_OR_EQUAL,      re.compile(r"<=")),
     (TokenType.GREATER_THAN_OR_EQUAL,   re.compile(r">=")),
     (TokenType.EQUAL,                   re.compile(r"==")),
+    (TokenType.NOT_EQUAL                re.compile(r"!=")),
     (TokenType.AND,                     re.compile(r"&&")),
     (TokenType.OR,                      re.compile(r"\|\|")),
     (TokenType.TOKEN_CONCATINATION,     re.compile(r"##")),
