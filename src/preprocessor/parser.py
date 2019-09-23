@@ -26,6 +26,10 @@ def _expect_token(tokens: List[Token], expected_types: Set[TokenType], pos: int 
 
 
 class Expression:
+    """
+    Class representation of an expression
+    """
+
     __PRECIDENCE_MAP = (
         ({TokenType.DEFINED, TokenType.NOT}, 100),
         ({TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL,
@@ -125,3 +129,24 @@ class Expression:
 
     def __init__(self, expression_stack: List[Token]):
         self.expression_stack = expression_stack
+
+
+class ObjectMacro:
+    """
+    Class representation of an object macro
+    """
+
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        """
+        Parses the following syntax:
+        IDENTIFIER TOKENS*
+        """
+        name_token = _expect_token(tokens, set(TokenType.IDENTIFIER))
+        remainder = tokens[1:]
+
+        return cls(name_token, remainder)
+    
+    def __init__(self, identifier: Token, value: List[Token]):
+        self.identifier = identifier
+        self.value = value
