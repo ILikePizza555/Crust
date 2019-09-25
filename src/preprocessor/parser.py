@@ -12,6 +12,15 @@ class PreprocessorSyntaxError(Exception):
         return f"Syntax error on line {self.line_number}, {self.column_number}: {self.message}"
 
 
+class UnknownPreprocessorDirectiveError(Exception):
+    def __init__(self, line_number: int, directive: str):
+        self.line_number = line_number
+        self.directive = directive
+
+    def __str__(self):
+        return f"Unknown directive on line {self.line_number}, '{self.directive}'."
+
+
 def _expect_token(tokens: List[Token], expected_types: Set[TokenType], pos: int = 0) -> Token:
     """
     Asserts that the `pos` token in the list is one of `expected_types`.
@@ -21,6 +30,18 @@ def _expect_token(tokens: List[Token], expected_types: Set[TokenType], pos: int 
 
     if peek.token_type not in expected_types:
         raise PreprocessorSyntaxError(peek.line, peek.col, f"Expected one of {expected_types}")
+
+    return tokens.pop(pos)
+
+
+def _expect_directive(tokens: List[Token], name: str, pos: int = 0) -> Token:
+    peek = tokens[pos]
+
+    if peek.token_type is not TokenType.DIRECTIVE:
+        raise PreprocessorSyntaxError(peek.line, peek.col, f"Expected a directive")
+
+    if peek.match.group(1) != name:
+        raise UnknownPreprocessorDirectiveError(peek.line, peek.match.group(1))
 
     return tokens.pop(pos)
 
@@ -181,3 +202,19 @@ class FunctionMacro:
         self.identifier = identifier
         self.parameters = parameters
         self.remainder = remainder
+
+
+class IncludeDirective:
+    """
+    Class representation of an include directive.
+    """
+
+    @classmethod
+    def from_tokens(cls, token_list: List[Token]) -> "IncludeDirective":
+        _expect_directive(token_list, "include")
+        parameter_tok = _expect_token(token_list, {TokenType.FILENAME, TokenType.STRING, TokenType.IDENTIFIER})
+
+        return cls(parameter_tok)
+
+    def __init__(self, parameter: Token):
+        self.parameter = parameter
