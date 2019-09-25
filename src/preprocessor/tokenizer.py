@@ -1,5 +1,4 @@
 import re
-import string
 from enum import Enum, unique, auto
 from typing import NamedTuple, List, Optional, Tuple
 from ..useful import StringCursor
@@ -67,7 +66,7 @@ TOKEN_MAP = (
     (TokenType.LESS_THAN_OR_EQUAL,      re.compile(r"<=")),
     (TokenType.GREATER_THAN_OR_EQUAL,   re.compile(r">=")),
     (TokenType.EQUAL,                   re.compile(r"==")),
-    (TokenType.NOT_EQUAL                re.compile(r"!=")),
+    (TokenType.NOT_EQUAL,               re.compile(r"!=")),
     (TokenType.AND,                     re.compile(r"&&")),
     (TokenType.OR,                      re.compile(r"\|\|")),
     (TokenType.TOKEN_CONCATINATION,     re.compile(r"##")),
@@ -87,15 +86,13 @@ class Token(NamedTuple):
     token_type: TokenType
     line: int
     col: int
-    text: str
+    match: re.Match
 
 
 def _tokenize_directive(cursor: StringCursor, line_number: int) -> Optional[Token]:
-    if cursor.peak() != "#":
-        raise UnknownTokenError(line_number, 0, cursor.peak())
+    directive_match = cursor.read_match(r"#(.*)")
 
-    directive_str = cursor.read_until(set(string.whitespace))
-    return Token(TokenType.DIRECTIVE, line_number, 1, directive_str[1:])
+    return Token(TokenType.DIRECTIVE, line_number, 1, directive_match)
 
 
 def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
@@ -104,9 +101,8 @@ def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
         match = cursor.read_match(matcher)
 
         if match:
-            token_str = match.group()
-            column = cursor.position - len(token_str)
-            return Token(token_type, line_number, column, token_str)
+            column = cursor.position - len(match.group())
+            return Token(token_type, line_number, column, match)
 
     raise UnknownTokenError(line_number, cursor.position, cursor.unread_slice)
 
