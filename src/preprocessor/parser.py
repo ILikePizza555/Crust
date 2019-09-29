@@ -307,7 +307,14 @@ class Parser(ParserBase):
             return DeferedInclude(param)
 
     def parse_define_line(self) -> Union[FunctionMacro, ObjectMacro]:
-        pass
+        current_line = self._read_current_line()
+        _expect_directive(current_line, "define")
+
+        # TODO: Better syntax error handling
+        try:
+            return FunctionMacro.from_tokens(current_line)
+        except PreprocessorSyntaxError:
+            return ObjectMacro.from_tokens(current_line)
 
     def parse_conditional_line(self) -> Tuple[str, Union[Expression, Token, None]]:
         current_line = self._read_current_line()
