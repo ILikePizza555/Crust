@@ -17,9 +17,9 @@ class UnexpectedTokenError(Exception):
     def __init__(self, unexpected_token: Token, expected_set: Set[Token]):
         self.unexpected_token = unexpected_token
         self.expected_set = expected_set
-    
+
     def __str__(self):
-        return f"Unexpected token"
+        return f"Unexpected token {self.unexpected_token.error_str}. Expected one of {expected_set}"
 
 
 class UnknownPreprocessorDirectiveError(Exception):
