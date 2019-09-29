@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import List, Set, Optional, Union
 from .tokenizer import Token, TokenType, VALUE_TOKENS, RTL_OPS, OPERATOR_TOKENS
 
 
@@ -204,17 +204,28 @@ class FunctionMacro:
         self.remainder = remainder
 
 
-class IncludeDirective:
+class EvaluatedInclude:
     """
-    Class representation of an include directive.
+    Class representation of a normal include directive.
     """
 
     @classmethod
-    def from_tokens(cls, token_list: List[Token]) -> "IncludeDirective":
-        _expect_directive(token_list, "include")
-        parameter_tok = _expect_token(token_list, {TokenType.FILENAME, TokenType.STRING, TokenType.IDENTIFIER})
+    def from_tokens(cls, token_list: List[Token]) -> "EvaluatedInclude":
+        parameter_tok = _expect_token(token_list, {TokenType.FILENAME, TokenType.STRING})
 
         return cls(parameter_tok)
 
     def __init__(self, parameter: Token):
-        self.parameter = parameter
+        self.expanded_include = (parameter.token_type is TokenType.STRING)
+        self.include_path = parameter.match.group(1)
+
+
+class DeferedInclude:
+    """
+    Include directive that uses an indentifier as it's parameter. We don't know what it includes
+    until we can evaluate the identifier.
+    """
+    def __init__(self, identifier: Token):
+        self.identifier = identifier
+
+
