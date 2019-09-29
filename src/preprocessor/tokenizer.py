@@ -88,6 +88,11 @@ class Token(NamedTuple):
     col: int
     match: re.Match
 
+    @property
+    def error_str(self):
+        """Returns a string representation for use in error text."""
+        return f"\"{self.token_type}\" at {self.line}, {self.col}"
+
 
 def _tokenize_directive(cursor: StringCursor, line_number: int) -> Optional[Token]:
     directive_match = cursor.read_match(r"#(.*)")

@@ -12,6 +12,16 @@ class PreprocessorSyntaxError(Exception):
         return f"Syntax error on line {self.line_number}, {self.column_number}: {self.message}"
 
 
+class UnexpectedTokenError(Exception):
+    """Thrown when the preprocessor encounters an unexpected token"""
+    def __init__(self, unexpected_token: Token, expected_set: Set[Token]):
+        self.unexpected_token = unexpected_token
+        self.expected_set = expected_set
+    
+    def __str__(self):
+        return f"Unexpected token"
+
+
 class UnknownPreprocessorDirectiveError(Exception):
     def __init__(self, line_number: int, directive: str):
         self.line_number = line_number
