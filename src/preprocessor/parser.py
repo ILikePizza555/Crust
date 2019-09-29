@@ -290,9 +290,9 @@ class Parser(ParserBase):
         self.parse_methods.update({
             "include": self.parse_include_line,
             "define": self.parse_define_line,
-            "if": self.parse_if_line,
-            "ifdef": self.parse_if_line,
-            "ifndef": self.parse_if_line
+            "if": self.parse_if_block,
+            "ifdef": self.parse_if_block,
+            "ifndef": self.parse_if_block
         })
 
     def parse_include_line(self) -> Union[EvaluatedInclude, DeferedInclude]:
@@ -309,14 +309,39 @@ class Parser(ParserBase):
     def parse_define_line(self) -> Union[FunctionMacro, ObjectMacro]:
         pass
 
-    def parse_if_line(self) -> List[ConditionalBranch]:
-        pass
+    def parse_conditional_line(self) -> Tuple[str, Union[Expression, Token, None]]:
+        current_line = self._read_current_line()
+        directive = _expect_token(current_line, set(TokenType.DIRECTIVE))
+        directive_str = directive.match.group(1).upper()
+
+        if directive_str in {"IF", "ELIF"}:
+            return (directive_str, Expression.from_tokens(current_line))
+        elif directive_str in {"IFDEF", "IFNDEF"}:
+            return (directive_str, current_line.pop(0))
+        else:
+            return (directive_str, None)
+
+    def parse_if_block(self) -> List[ConditionalBranch]:
+        block_markers = ((x[1], x[2]) for x in self._read_conditional_block() if x[0] == 1)
+        block_ranges = ((a[1], b[1]) for a, b in zip(block_markers, block_markers[1:]))
+        branches: List[ConditionalBranch] = []
+
+        for begin, end in block_ranges:
+            line_type, value = self.parse_conditional_line()
+            children: List[ASTObject] = []
+
+            while self._current_line < end:
+                children.append(self.parse_next())
+
+            branches.append(ConditionalBranch(children, value))
+
+        return branches
 
     def _read_conditional_block(self) -> List[Tuple[int, str, int]]:
         if_stack = 0
         markers: List[Tuple[str, int]] = []
 
-        for line_number, line in enumerate(self._lines[self._current_line:]):
+        for line_number, line in enumerate(self._lines[self._current_line:], start=self._current_line):
             beginning = line[0]
             assert beginning.token_type is TokenType.DIRECTIVE
             directive = beginning.match.group(1).upper()
