@@ -1,4 +1,4 @@
-from typing import List, Set, Optional, Union, Dict, Callable
+from typing import List, Set, Optional, Union, Callable, Tuple
 from .tokenizer import Token, TokenType, VALUE_TOKENS, RTL_OPS, OPERATOR_TOKENS
 
 
@@ -288,7 +288,11 @@ class Parser(ParserBase):
 
         # TODO: Make this into some sort of decorator functionality
         self.parse_methods.update({
-            "include": self.parse_include_line
+            "include": self.parse_include_line,
+            "define": self.parse_define_line,
+            "if": self.parse_if_line,
+            "ifdef": self.parse_if_line,
+            "ifndef": self.parse_if_line
         })
 
     def parse_include_line(self) -> Union[EvaluatedInclude, DeferedInclude]:
@@ -301,3 +305,32 @@ class Parser(ParserBase):
             return EvaluatedInclude(param)
         except PreprocessorSyntaxError:
             return DeferedInclude(param)
+
+    def parse_define_line(self) -> Union[FunctionMacro, ObjectMacro]:
+        pass
+
+    def parse_if_line(self) -> List[ConditionalBranch]:
+        pass
+
+    def _read_conditional_block(self) -> List[Tuple[int, str, int]]:
+        if_stack = 0
+        markers: List[Tuple[str, int]] = []
+
+        for line_number, line in enumerate(self._lines[self._current_line:]):
+            beginning = line[0]
+            assert beginning.token_type is TokenType.DIRECTIVE
+            directive = beginning.match.group(1).upper()
+
+            if directive in {"IF", "IFDEF", "IFNDEF"}:
+                if_stack += 1
+                markers.append((if_stack, directive, line_number))
+            elif directive in {"ELSE", "ELIF"}:
+                markers.append((if_stack, directive, line_number))
+            elif beginning.match.group(1).upper() == "ENDIF":
+                markers.append((if_stack, directive, line_number))
+                if_stack -= 1
+
+                if if_stack == 0:
+                    return markers
+
+        raise PreprocessorSyntaxError(line_number, 0, "Expected #endif")
