@@ -66,8 +66,8 @@ class Expression:
         ({TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL,
             TokenType.LESS_THAN, TokenType.GREATER_THAN}, 90),
         ({TokenType.EQUAL, TokenType.NOT_EQUAL}, 80),
-        (set(TokenType.AND), 50),
-        (set(TokenType.OR), 40)
+        ({TokenType.AND, }, 50),
+        ({TokenType.OR, }, 40)
     )
 
     @staticmethod
