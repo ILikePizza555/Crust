@@ -11,6 +11,13 @@ def assert_token_equals(token: Token, type: TokenType, line: int, col: int, matc
     assert token.match.group() == matched
 
 
+def assert_token_lists_equal(actual: list, expected: list):
+    assert len(actual) == len(expected)
+
+    for a, e in zip(actual, expected):
+        assert_token_equals(a, *e)
+
+
 def test_tokenize_directive_valid_input():
     cursor = StringCursor("#include <iostream>")
     actual = _tokenize_directive(cursor, 0)
@@ -34,8 +41,8 @@ def test_tokenize_directive_error():
 
 
 test_data = [
-    ("Null directive", "#\n", 0, [(TokenType.DIRECTIVE, 0, 1, "")]),
-    ("No parameter directive", "#pragma\n", 0, [(TokenType.DIRECTIVE, 0, 1, "pragma")]),
+    ("Null directive", "#\n", 0, [(TokenType.DIRECTIVE, 0, 1, "#")]),
+    ("No parameter directive", "#pragma\n", 0, [(TokenType.DIRECTIVE, 0, 1, "#pragma")]),
     ("Integer constant", "#define TEST_INT 1234\n", 4, [
         (TokenType.DIRECTIVE, 4, 1, "#define"),
         (TokenType.IDENTIFIER, 4, 8, "TEST_INT"),
@@ -92,22 +99,22 @@ def test_tokenize_line(line_str, line_number, expected):
     cursor = StringCursor(line_str)
 
     actual_list, line_offset = tokenize_line(cursor, line_number)
-
-    assert len(actual_list) == len(expected)
-    for a, e in zip(actual_list, expected):
-        assert_token_equals(a, *e)
+    assert_token_lists_equal(actual_list, expected)
 
 
 def test_tokenize_line_escaped_line_endings():
     cursor = StringCursor("#define TEST_LIST a, \\\n\tb, \\\n\tc\n")
-    actual, line_offset = tokenize_line(cursor, 0)
+    actual_list, line_offset = tokenize_line(cursor, 0)
 
-    assert actual == [
-        Token(TokenType.DIRECTIVE, 0, 1, "define"),
-        Token(TokenType.IDENTIFIER, 0, 8, "TEST_LIST"),
-        Token(TokenType.IDENTIFIER, 0, 18, "a"),
-        Token(TokenType.COMMA, 0, 19, ","),
-        Token(TokenType.IDENTIFIER, 1, 24, "b"),
-        Token(TokenType.COMMA, 1, 25, ","),
-        Token(TokenType.IDENTIFIER, 2, 30, "c")]
+    expected_list = [
+        (TokenType.DIRECTIVE, 0, 1, "#define"),
+        (TokenType.IDENTIFIER, 0, 8, "TEST_LIST"),
+        (TokenType.IDENTIFIER, 0, 18, "a"),
+        (TokenType.COMMA, 0, 19, ","),
+        (TokenType.IDENTIFIER, 1, 24, "b"),
+        (TokenType.COMMA, 1, 25, ","),
+        (TokenType.IDENTIFIER, 2, 30, "c")
+    ]
+
+    assert_token_lists_equal(actual_list, expected_list)
     assert line_offset == 3
