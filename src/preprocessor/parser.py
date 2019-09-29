@@ -266,15 +266,18 @@ class ParserBase():
     def done(self):
         return self._current_line >= len(self._lines)
 
-    def run_parser(self) -> List[ASTObject]:
+    def parse_next(self) -> Optional[ASTObject]:
+        try:
+            if not self.done:
+                return self.parse_methods[self._peek_directive()]()
+        except KeyError:
+            raise UnknownPreprocessorDirectiveError(self._get_current_line_number(), self._peek_directive())
+
+    def parse_lines(self) -> List[ASTObject]:
         object_return = []
 
         while not self.done:
-            try:
-                parse_func = self.parse_methods[self._peek_directive()]
-                object_return.append(parse_func())
-            except KeyError:
-                raise UnknownPreprocessorDirectiveError(self._get_current_line_number(), self._peek_directive())
+            object_return.append(self.parse_next())
 
         return object_return
 
