@@ -229,3 +229,12 @@ class DeferedInclude:
         self.identifier = identifier
 
 
+class ConditionalBranch:
+    """
+    Pairs an optional expression with children nodes
+    """
+    def __init__(self, children: List[any], condition: Optional[Expression]):
+        self.children = children
+        self.condition = condition
+
+
