@@ -238,3 +238,27 @@ class ConditionalBranch:
         self.condition = condition
 
 
+ASTObject = Union[Expression, ObjectMacro, FunctionMacro, EvaluatedInclude, DeferedInclude, ConditionalBranch]
+
+
+def parse_include_line(token_lines: List[List[Token]]) -> Union[EvaluatedInclude, DeferedInclude]:
+    current_line = token_lines.pop(0)
+
+    _expect_directive(current_line, "include")
+    param = _expect_token(current_line, {TokenType.IDENTIFIER, TokenType.STRING, TokenType.FILENAME})
+
+    try:
+        return EvaluatedInclude(param)
+    except PreprocessorSyntaxError:
+        return DeferedInclude(param)
+
+
+def parse_token_lines(token_lines: List[List[Token]]):
+    """Parses tokens into objects that can be evaluated"""
+
+    return_objects: List[ASTObject] = []
+
+    while token_lines:
+        pass
+
+    return return_objects
