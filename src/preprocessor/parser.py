@@ -1,4 +1,4 @@
-from typing import List, Set, Optional, Union
+from typing import List, Set, Optional, Union, Dict, Callable
 from .tokenizer import Token, TokenType, VALUE_TOKENS, RTL_OPS, OPERATOR_TOKENS
 
 
@@ -241,24 +241,60 @@ class ConditionalBranch:
 ASTObject = Union[Expression, ObjectMacro, FunctionMacro, EvaluatedInclude, DeferedInclude, ConditionalBranch]
 
 
-def parse_include_line(token_lines: List[List[Token]]) -> Union[EvaluatedInclude, DeferedInclude]:
-    current_line = token_lines.pop(0)
+class ParserBase():
+    def __init__(self, token_lines: List[List[Token]]):
+        self._lines = token_lines
+        self._current_line = 0
+        self.parse_methods: dict[str, Callable[None, ASTObject]] = dict()
 
-    _expect_directive(current_line, "include")
-    param = _expect_token(current_line, {TokenType.IDENTIFIER, TokenType.STRING, TokenType.FILENAME})
+    def _peak_current_line(self) -> List[Token]:
+        return self._lines[self._current_line]
 
-    try:
-        return EvaluatedInclude(param)
-    except PreprocessorSyntaxError:
-        return DeferedInclude(param)
+    def _get_current_line_number(self) -> int:
+        return self._peak_current_line()[0].line
+
+    def _read_current_line(self, n: int = 1):
+        self._current_line = min(self._current_line + n, len(self._lines))
+        return self._lines[self._current_line - n:self._current_line]
+
+    def _peek_directive(self) -> str:
+        peek_directive_tok = self._peak_current_line()[0]
+        assert peek_directive_tok.token_type is TokenType.DIRECTIVE
+        return peek_directive_tok.match.group(1)
+
+    @property
+    def done(self):
+        return self._current_line >= len(self._lines)
+
+    def run_parser(self) -> List[ASTObject]:
+        object_return = []
+
+        while not self.done:
+            try:
+                parse_func = self.parse_methods[self._peek_directive()]
+                object_return.append(parse_func())
+            except KeyError:
+                raise UnknownPreprocessorDirectiveError(self._get_current_line_number(), self._peek_directive())
+
+        return object_return
 
 
-def parse_token_lines(token_lines: List[List[Token]]):
-    """Parses tokens into objects that can be evaluated"""
+class Parser(ParserBase):
+    def __init__(self, token_lines: List[List[Token]]):
+        super(Parser, self).__init__(token_lines)
 
-    return_objects: List[ASTObject] = []
+        # TODO: Make this into some sort of decorator functionality
+        self.parse_methods.update({
+            "include": self.parse_include_line
+        })
 
-    while token_lines:
-        pass
+    def parse_include_line(self) -> Union[EvaluatedInclude, DeferedInclude]:
+        current_line = self._read_current_line()
+        _expect_directive(current_line, "include")
 
-    return return_objects
+        param = _expect_token(current_line, {TokenType.IDENTIFIER, TokenType.STRING, TokenType.FILENAME})
+
+        try:
+            return EvaluatedInclude(param)
+        except PreprocessorSyntaxError:
+            return DeferedInclude(param)
