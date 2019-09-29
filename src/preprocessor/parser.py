@@ -39,7 +39,7 @@ def _expect_token(tokens: List[Token], expected_types: Set[TokenType], pos: int 
     peek = tokens[pos]
 
     if peek.token_type not in expected_types:
-        raise PreprocessorSyntaxError(peek.line, peek.col, f"Expected one of {expected_types}")
+        raise UnexpectedTokenError(peek, expected_types)
 
     return tokens.pop(pos)
 
@@ -48,7 +48,7 @@ def _expect_directive(tokens: List[Token], name: str, pos: int = 0) -> Token:
     peek = tokens[pos]
 
     if peek.token_type is not TokenType.DIRECTIVE:
-        raise PreprocessorSyntaxError(peek.line, peek.col, f"Expected a directive")
+        raise UnexpectedTokenError(peek, {TokenType.DIRECTIVE})
 
     if peek.match.group(1) != name:
         raise UnknownPreprocessorDirectiveError(peek.line, peek.match.group(1))
@@ -323,7 +323,7 @@ class Parser(ParserBase):
         # TODO: Better syntax error handling
         try:
             return FunctionMacro.from_tokens(current_line)
-        except PreprocessorSyntaxError:
+        except UnexpectedTokenError:
             return ObjectMacro.from_tokens(current_line)
 
     def parse_conditional_line(self) -> Tuple[str, Union[Expression, Token, None]]:
