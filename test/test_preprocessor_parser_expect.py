@@ -1,11 +1,11 @@
 import pytest # NOQA
-from test_preprocessor_tokenizer import assert_token_equals
+from .test_preprocessor_tokenizer import assert_token_equals
 from src.useful import StringCursor
 from src.preprocessor.tokenizer import tokenize_line, TokenType
 from src.preprocessor.parser import _expect_directive, _expect_token, UnexpectedTokenError, UnknownPreprocessorDirectiveError
 
 
-TEST_TOKENS = tuple(tokenize_line(StringCursor('#define MAC(FOO, BAR) "dir/"##FOO#BAR'), 0))
+TEST_TOKENS = tuple(tokenize_line(StringCursor('#define MAC(FOO, BAR) "dir/"##FOO#BAR'), 0)[0])
 
 
 def test_simple_expect_token():
