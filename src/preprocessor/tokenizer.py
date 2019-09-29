@@ -95,7 +95,7 @@ class Token(NamedTuple):
 
 
 def _tokenize_directive(cursor: StringCursor, line_number: int) -> Optional[Token]:
-    directive_match = cursor.read_match(r"#(.*)")
+    directive_match = cursor.read_match(r"#(\S*)")
 
     return Token(TokenType.DIRECTIVE, line_number, 1, directive_match)
 
