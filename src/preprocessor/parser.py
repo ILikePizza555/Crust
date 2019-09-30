@@ -19,7 +19,7 @@ class UnexpectedTokenError(Exception):
         self.expected_set = expected_set
 
     def __str__(self):
-        return f"Unexpected token {self.unexpected_token.error_str}. Expected one of {expected_set}"
+        return f"Unexpected token {self.unexpected_token.error_str}. Expected one of {self.expected_set}"
 
 
 class UnknownPreprocessorDirectiveError(Exception):
