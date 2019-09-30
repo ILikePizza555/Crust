@@ -84,7 +84,7 @@ class Expression:
                 0 if op1 and op2 have the sace precidence,
                 -1 if op1 has a lower precidence than op2
         """
-        v = Expression.__get_precidence(op1) - Expression.__get_precidence(op2)
+        v = Expression.__get_operator_precidence(op1) - Expression.__get_operator_precidence(op2)
 
         if v > 0:
             return 1
