@@ -26,7 +26,8 @@ EXPRESSION_TEST_DATA = (
             (TokenType.INTEGER_CONST, "45"), (TokenType.INTEGER_CONST, "51"),
             (TokenType.LESS_THAN_OR_EQUAL, "<="),
             (TokenType.IDENTIFIER, "FOOBAR"),
-            (TokenType.DEFINED, "defined")
+            (TokenType.DEFINED, "defined"),
+            (TokenType.AND, "&&")
         )
     ),
     (
