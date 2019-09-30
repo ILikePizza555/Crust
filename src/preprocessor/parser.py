@@ -123,7 +123,7 @@ class Expression:
                 raise PreprocessorSyntaxError(paran_tok.line, paran_tok.col, "Unexpected ')'.")
 
     @staticmethod
-    def push_operator_stack(operator_stack: List[Token], output_stack: List[Token]):
+    def _push_operator_stack(operator_stack: List[Token], output_stack: List[Token]):
         for operator in reversed(operator_stack):
             if operator.token_type in {TokenType.LPARAN, TokenType.RPARAN}:
                 raise PreprocessorSyntaxError(operator.line, operator.col, "Unexpected paranthesis")
