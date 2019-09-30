@@ -17,7 +17,7 @@ def assert_token_equals(actual: Token, type: TokenType, line=None, col=None, mat
         assert actual.match.group() == matched
 
 
-def assert_token_lists_equal(actual: list, expected: dict):
+def assert_token_lists_equal(actual: list, expected: list):
     assert len(actual) == len(expected)
 
     for a, e in zip(actual, expected):
