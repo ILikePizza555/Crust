@@ -52,7 +52,7 @@ RTL_OPS = {
 OPERATOR_TOKENS = {
     TokenType.NOT, TokenType.DEFINED, TokenType.EQUAL, TokenType.NOT_EQUAL,
     TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL, TokenType.GREATER_THAN,
-    TokenType.LESS_THAN
+    TokenType.LESS_THAN, TokenType.AND, TokenType.OR
 }
 
 # List of 2-tuples, pairing the TokenType with a way to match it. Sorted in order of priority.
