@@ -1,22 +1,24 @@
 import pytest # NOQA
 from src.preprocessor.tokenizer import tokenize_line, TokenType, _tokenize_directive, UnknownTokenError
 from src.useful import StringCursor
-from .util_tokens import assert_token_equals, assert_token_lists_equal
+from .util_tokens import MockToken, assert_token_equals, assert_token_lists_equal
 
 
 def test_tokenize_directive_valid_input():
     cursor = StringCursor("#include <iostream>")
     actual = _tokenize_directive(cursor, 0)
+    EXPECTED = MockToken(TokenType.DIRECTIVE, "#include", 0, 1)
 
-    assert_token_equals(actual, TokenType.DIRECTIVE, 0, 1, "#include")
+    assert_token_equals(actual, EXPECTED)
     assert cursor.position == 8
 
 
 def test_tokenize_directive_null():
     cursor = StringCursor("# the rest of this should not be read")
     actual = _tokenize_directive(cursor, 0)
+    EXPECTED = MockToken(TokenType.DIRECTIVE, "#", 0, 1)
 
-    assert_token_equals(actual, TokenType.DIRECTIVE, 0, 1, "#")
+    assert_token_equals(actual, EXPECTED)
     assert cursor.position == 1
 
 
@@ -27,232 +29,232 @@ def test_tokenize_directive_error():
 
 
 test_data = [
-    ("Null directive", "#\n", 0, [
+    ("Null directive", "#\n", 0, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 0,
             "col": 1,
-            "matched": "#"
-        }
-    ]),
-    ("No parameter directive", "#pragma\n", 0, [
+            "match": "#"
+        },
+    ))),
+    ("No parameter directive", "#pragma\n", 0, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 0,
             "col": 1,
-            "matched": "#pragma"
-        }
-    ]),
-    ("Integer constant", "#define TEST_INT 1234\n", 4, [
+            "match": "#pragma"
+        },
+    ))),
+    ("Integer constant", "#define TEST_INT 1234\n", 4, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 4,
             "col": 1,
-            "matched": "#define"
+            "match": "#define"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 4,
             "col": 8,
-            "matched": "TEST_INT"
+            "match": "TEST_INT"
         },
         {
-            "type": TokenType.INTEGER_CONST,
+            "token_type": TokenType.INTEGER_CONST,
             "line": 4,
             "col": 17,
-            "matched": "1234"
+            "match": "1234"
         }
-    ]),
-    ("Character constant", "#define TEST_CHAR 's'\n", 5, [
+    ))),
+    ("Character constant", "#define TEST_CHAR 's'\n", 5, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 5,
             "col": 1,
-            "matched": "#define"
+            "match": "#define"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 5,
             "col": 8,
-            "matched": "TEST_CHAR"
+            "match": "TEST_CHAR"
         },
         {
-            "type": TokenType.CHAR_CONST,
+            "token_type": TokenType.CHAR_CONST,
             "line": 5,
             "col": 18,
-            "matched": "'s'"
+            "match": "'s'"
         }
-    ]),
-    ("Function macro", "#define FMACRO(name) typedef struct name##_s name##_t\n", 6, [
+    ))),
+    ("Function macro", "#define FMACRO(name) typedef struct name##_s name##_t\n", 6, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 6,
             "col": 1,
-            "matched": "#define"
+            "match": "#define"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 8,
-            "matched": "FMACRO"
+            "match": "FMACRO"
         },
         {
-            "type": TokenType.LPARAN,
+            "token_type": TokenType.LPARAN,
             "line": 6,
             "col": 14,
-            "matched": "("
+            "match": "("
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 15,
-            "matched": "name"
+            "match": "name"
         },
         {
-            "type": TokenType.RPARAN,
+            "token_type": TokenType.RPARAN,
             "line": 6,
             "col": 19,
-            "matched": ")"
+            "match": ")"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 21,
-            "matched": "typedef"
+            "match": "typedef"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 29,
-            "matched": "struct"
+            "match": "struct"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 36,
-            "matched": "name"
+            "match": "name"
         },
         {
-            "type": TokenType.TOKEN_CONCATINATION, 
+            "token_type": TokenType.TOKEN_CONCATINATION, 
             "line": 6, 
             "col": 40,
-            "matched": "##"
+            "match": "##"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 42,
-            "matched": "_s"
+            "match": "_s"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 45,
-            "matched": "name"
+            "match": "name"
         },
         {
-            "type": TokenType.TOKEN_CONCATINATION,
+            "token_type": TokenType.TOKEN_CONCATINATION,
             "line": 6,
             "col": 49,
-            "matched": "##"
+            "match": "##"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 6,
             "col": 51,
-            "matched": "_t"
+            "match": "_t"
         }
-    ]),
-    ("Conditional statement", "#if X <= 5\n", 7, [
+    ))),
+    ("Conditional statement", "#if X <= 5\n", 7, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 7,
             "col": 1,
-            "matched": "#if"
+            "match": "#if"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 7,
             "col": 4,
-            "matched": "X"
+            "match": "X"
         },
         {
-            "type": TokenType.LESS_THAN_OR_EQUAL,
+            "token_type": TokenType.LESS_THAN_OR_EQUAL,
             "line": 7,
             "col": 6,
-            "matched": "<="
+            "match": "<="
         },
         {
-            "type": TokenType.INTEGER_CONST,
+            "token_type": TokenType.INTEGER_CONST,
             "line": 7,
             "col": 9,
-            "matched": "5"
+            "match": "5"
         }
-    ]),
-    ("Include statement", "#include <stdio.h>\n", 8, [
+    ))),
+    ("Include statement", "#include <stdio.h>\n", 8, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 8,
             "col": 1,
-            "matched": "#include"
+            "match": "#include"
         },
         {
-            "type": TokenType.FILENAME,
+            "token_type": TokenType.FILENAME,
             "line": 8,
             "col": 9,
-            "matched": "<stdio.h>"
+            "match": "<stdio.h>"
         }
-    ]),
-    ("Conditionals aren't files", "#pragma 34 <= TEST_1 || TEST_2 > 55\n", 9, [
+    ))),
+    ("Conditionals aren't files", "#pragma 34 <= TEST_1 || TEST_2 > 55\n", 9, tuple(MockToken(**x) for x in (
         {
-            "type": TokenType.DIRECTIVE,
+            "token_type": TokenType.DIRECTIVE,
             "line": 9,
             "col": 1,
-            "matched": "#pragma"
+            "match": "#pragma"
         },
         {
-            "type": TokenType.INTEGER_CONST,
+            "token_type": TokenType.INTEGER_CONST,
             "line": 9,
             "col": 8,
-            "matched": "34"
+            "match": "34"
         },
         {
-            "type": TokenType.LESS_THAN_OR_EQUAL,
+            "token_type": TokenType.LESS_THAN_OR_EQUAL,
             "line": 9,
             "col": 11,
-            "matched": "<="
+            "match": "<="
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 9,
             "col": 14,
-            "matched": "TEST_1"
+            "match": "TEST_1"
         },
         {
-            "type": TokenType.OR,
+            "token_type": TokenType.OR,
             "line": 9,
             "col": 21,
-            "matched": "||"
+            "match": "||"
         },
         {
-            "type": TokenType.IDENTIFIER,
+            "token_type": TokenType.IDENTIFIER,
             "line": 9,
             "col": 24,
-            "matched": "TEST_2"
+            "match": "TEST_2"
         },
         {
-            "type": TokenType.GREATER_THAN,
+            "token_type": TokenType.GREATER_THAN,
             "line": 9,
             "col": 31,
-            "matched": ">"
+            "match": ">"
         },
         {
-            "type": TokenType.INTEGER_CONST,
+            "token_type": TokenType.INTEGER_CONST,
             "line": 9,
             "col": 33,
-            "matched": "55"
+            "match": "55"
         }
-    ])
+    )))
 ]
 
 
@@ -267,50 +269,50 @@ def test_tokenize_line(line_str, line_number, expected):
     assert_token_lists_equal(actual_list, expected)
 
 
-LINE_ENDINGS_TEST_DATA = [
+LINE_ENDINGS_TEST_DATA = tuple(MockToken(**x) for x in (
     {
-        "type": TokenType.DIRECTIVE,
+        "token_type": TokenType.DIRECTIVE,
         "line": 0,
         "col": 1,
-        "matched": "#define"
+        "match": "#define"
     },
     {
-        "type": TokenType.IDENTIFIER,
+        "token_type": TokenType.IDENTIFIER,
         "line": 0,
         "col": 8,
-        "matched": "TEST_LIST"
+        "match": "TEST_LIST"
     },
     {
-        "type": TokenType.IDENTIFIER,
+        "token_type": TokenType.IDENTIFIER,
         "line": 0,
         "col": 18,
-        "matched": "a"
+        "match": "a"
     },
     {
-        "type": TokenType.COMMA,
+        "token_type": TokenType.COMMA,
         "line": 0,
         "col": 19,
-        "matched": ","
+        "match": ","
     },
     {
-        "type": TokenType.IDENTIFIER,
+        "token_type": TokenType.IDENTIFIER,
         "line": 1,
         "col": 24,
-        "matched": "b"
+        "match": "b"
     },
     {
-        "type": TokenType.COMMA,
+        "token_type": TokenType.COMMA,
         "line": 1,
         "col": 25,
-        "matched": ","
+        "match": ","
     },
     {
-        "type": TokenType.IDENTIFIER,
+        "token_type": TokenType.IDENTIFIER,
         "line": 2,
         "col": 30,
-        "matched": "c"
+        "match": "c"
     }
-]
+))
 
 
 def test_tokenize_line_escaped_line_endings():
