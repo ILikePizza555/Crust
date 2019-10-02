@@ -24,5 +24,5 @@ def assert_token_lists_equal(actual: List[Token], expected: List[dict]):
         assert_token_equals(a, **e)
 
 
-def tokenize_string(s: str) -> List[Token]:
-    return tokenize_line(StringCursor(s))
+def tokenize_string(s: str, line_number: int = 0) -> List[Token]:
+    return tokenize_line(StringCursor(s), line_number)
