@@ -1,6 +1,6 @@
 import re
 from src.preprocessor.tokenizer import Token, TokenType
-from util_tokens import MockToken
+from .util_tokens import MockToken
 
 
 def test_token_equality():
