@@ -173,14 +173,17 @@ class ObjectMacro:
         Parses the following syntax:
         IDENTIFIER TOKENS*
         """
-        name_token = _expect_token(tokens, set(TokenType.IDENTIFIER))
-        remainder = tokens[1:]
+        name_token = _expect_token(tokens, {TokenType.IDENTIFIER, })
+        remainder = tokens
 
         return cls(name_token.match.group(), remainder)
 
     def __init__(self, identifier: str, value: List[Token]):
         self.identifier = identifier
         self.value = value
+
+    def __repr__(self):
+        return f"ObjectMacro(identifier={self.identifier}, value={self.value})"
 
     def __eq__(self, o):
         return self.identifier == o.identifier and self.value == o.value
