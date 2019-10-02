@@ -15,9 +15,9 @@ class TestData(Generic[IT, ET]):
         return f"TestData(name={self.name}, input_data={self.input_data}, expected={self.expected})"
 
 
-def test_data_to_names(data_iterable: Iterable[TestData]) -> List[str]:
+def convert_to_names(data_iterable: Iterable[TestData]) -> List[str]:
     return [x.name for x in data_iterable]
 
 
-def test_data_to_parameters(data_iterable: Iterable[TestData[IT, ET]]) -> List[Tuple[IT, ET]]:
+def convert_to_parameters(data_iterable: Iterable[TestData[IT, ET]]) -> List[Tuple[IT, ET]]:
     return [(x.input_data, x.expected) for x in data_iterable]
