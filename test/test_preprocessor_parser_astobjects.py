@@ -58,7 +58,7 @@ def test_expression_from_tokens(test_tokens, expected_stack):
 def test_objectmacro_tokens():
     TEST_DATA = TestData(
         "normal",
-        tokenize_string("# FOOBAR 64")[1:],
+        tokenize_string("# FOOBAR 64"),
         ObjectMacro("FOOBAR", [Token(TokenType.INTEGER_CONST, 0, 9, "64")])
     )
 
