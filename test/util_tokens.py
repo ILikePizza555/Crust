@@ -1,27 +1,38 @@
-from typing import List
+from typing import List, Optional
 from src.preprocessor.tokenizer import Token, TokenType, tokenize_line
 from src.useful import StringCursor
 
 
-def assert_token_equals(actual: Token, type: TokenType, line=None, col=None, matched=None):
+def MockToken():
+    def __init__(self, token_type: TokenType, match: Optional[str] = None, line: Optional[int] = None, col: Optional[int] = None):
+        self.token_type = token_type
+        self.match = match
+        self.line = line
+        self.col = col
+
+    def __repr__(self):
+        return f"MockToken(token_type={self.token_type}, matched={self.match}, line={self.line}, col={self.col})"
+
+
+def assert_token_equals(actual: Token, expected: MockToken):
     """Helper function to test token equality"""
-    assert actual.token_type is type
+    assert actual.token_type is expected.token_type
 
-    if line is not None:
-        assert actual.line == line
+    if expected.line is not None:
+        assert actual.line == expected.line
 
-    if col is not None:
-        assert actual.col == col
+    if expected.col is not None:
+        assert actual.col == expected.col
 
-    if matched is not None:
-        assert actual.match.group() == matched
+    if expected.matched is not None:
+        assert actual.match.group() == expected.matched
 
 
-def assert_token_lists_equal(actual: List[Token], expected: List[dict]):
+def assert_token_lists_equal(actual: List[Token], expected: list[MockToken]):
     assert len(actual) == len(expected)
 
     for a, e in zip(actual, expected):
-        assert_token_equals(a, **e)
+        assert_token_equals(a, e)
 
 
 def tokenize_string(s: str, line_number: int = 0, cut_directive: bool = True) -> List[Token]:
