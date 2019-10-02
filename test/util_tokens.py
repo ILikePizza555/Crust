@@ -3,7 +3,7 @@ from src.preprocessor.tokenizer import Token, TokenType, tokenize_line
 from src.useful import StringCursor
 
 
-def MockToken():
+class MockToken():
     def __init__(self, token_type: TokenType, match: Optional[str] = None, line: Optional[int] = None, col: Optional[int] = None):
         self.token_type = token_type
         self.match = match
@@ -24,11 +24,11 @@ def assert_token_equals(actual: Token, expected: MockToken):
     if expected.col is not None:
         assert actual.col == expected.col
 
-    if expected.matched is not None:
-        assert actual.match.group() == expected.matched
+    if expected.match is not None:
+        assert actual.match.group() == expected.match
 
 
-def assert_token_lists_equal(actual: List[Token], expected: list[MockToken]):
+def assert_token_lists_equal(actual: List[Token], expected: List[MockToken]):
     assert len(actual) == len(expected)
 
     for a, e in zip(actual, expected):
