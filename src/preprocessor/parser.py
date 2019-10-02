@@ -176,11 +176,14 @@ class ObjectMacro:
         name_token = _expect_token(tokens, set(TokenType.IDENTIFIER))
         remainder = tokens[1:]
 
-        return cls(name_token, remainder)
+        return cls(name_token.match.group(), remainder)
 
-    def __init__(self, identifier: Token, value: List[Token]):
+    def __init__(self, identifier: str, value: List[Token]):
         self.identifier = identifier
         self.value = value
+
+    def __eq__(self, o):
+        return self.identifier == o.identifier and self.value == o.value
 
 
 class FunctionMacro:
