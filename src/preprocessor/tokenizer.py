@@ -1,6 +1,6 @@
 import re
 from enum import Enum, unique, auto
-from typing import NamedTuple, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from ..useful import StringCursor
 
 
@@ -81,12 +81,16 @@ TOKEN_MAP = (
 )
 
 
-class Token(NamedTuple):
+class Token():
     """A simple class storing the token, its type, and its metadata"""
-    token_type: TokenType
-    line: int
-    col: int
-    match: re.Match
+    def __init__(self, token_type: TokenType, line: int, col: int, match: re.Match):
+        self.token_type = token_type
+        self.line = line
+        self.col = col
+        self.match = match
+
+    def __repr__(self):
+        return f"Token(token_type={self.token_type}, line={self.line}, col={self.line}, match={self.match})"
 
     @property
     def error_str(self):
