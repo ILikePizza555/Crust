@@ -24,5 +24,10 @@ def assert_token_lists_equal(actual: List[Token], expected: List[dict]):
         assert_token_equals(a, **e)
 
 
-def tokenize_string(s: str, line_number: int = 0) -> List[Token]:
-    return tokenize_line(StringCursor(s), line_number)
+def tokenize_string(s: str, line_number: int = 0, cut_directive: bool = True) -> List[Token]:
+    tokens, _ = tokenize_line(StringCursor(s), line_number)
+
+    if cut_directive and tokens[0].token_type is TokenType.DIRECTIVE:
+        tokens.pop(0)
+    
+    return tokens
