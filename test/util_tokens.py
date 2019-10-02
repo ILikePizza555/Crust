@@ -13,6 +13,18 @@ class MockToken():
     def __repr__(self):
         return f"MockToken(token_type={self.token_type}, matched={self.match}, line={self.line}, col={self.col})"
 
+    def __eq__(self, other):
+        if type(other) is MockToken:
+            return (self.token_type == other.token_type and
+                    self.match == other.match and
+                    self.line == other.line and
+                    self.col == other.col)
+        elif type(other) is Token:
+            return (self.token_type == other.token_type and
+                    (self.match is None or self.match == other.match.group()) and
+                    (self.line is None or self.line == other.line) and
+                    (self.col is None or self.col == other.col))
+
 
 def assert_token_equals(actual: Token, expected: MockToken):
     """Helper function to test token equality"""
