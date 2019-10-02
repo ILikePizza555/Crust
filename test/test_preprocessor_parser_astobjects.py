@@ -59,7 +59,7 @@ def test_objectmacro_tokens():
     TEST_DATA = TestData(
         "normal",
         tokenize_string("# FOOBAR 64"),
-        ObjectMacro("FOOBAR", [Token(TokenType.INTEGER_CONST, 0, 9, "64")])
+        ObjectMacro("FOOBAR", [MockToken(TokenType.INTEGER_CONST, "64", 0, 9)])
     )
 
     actual = ObjectMacro.from_tokens(TEST_DATA.input_data)
