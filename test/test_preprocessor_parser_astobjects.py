@@ -1,25 +1,25 @@
 import pytest
-from typing import Tuple
-from .test_preprocessor_tokenizer import assert_token_lists_equal
+from .util_testdata import TestData, test_data_to_names, test_data_to_parameters
+from .util_tokens import assert_token_lists_equal
 from src.useful import StringCursor
 from src.preprocessor.tokenizer import tokenize_line, TokenType
 from src.preprocessor.parser import Expression
 
 
 EXPRESSION_TEST_DATA = (
-    (
+    TestData(
         "identifier is an expression",
-        "# FOOBAR",
+        StringCursor("# FOOBAR"),
         ((TokenType.IDENTIFIER, "FOOBAR"),)
     ),
-    (
+    TestData(
         "single operator expression",
         "# 45 <= 51",
         (
             (TokenType.INTEGER_CONST, "45"), (TokenType.INTEGER_CONST, "51"), (TokenType.LESS_THAN_OR_EQUAL, "<=")
         )
     ),
-    (
+    TestData(
         "multi operator expression",
         "# 45 <= 51 && defined FOOBAR",
         (
@@ -30,7 +30,7 @@ EXPRESSION_TEST_DATA = (
             (TokenType.AND, "&&")
         )
     ),
-    (
+    TestData(
         "complex expression",
         "# ! (defined FOOBAR || !(FOOBAR2 == 1 && FOOBAR3 <= 0)) && FOOBAR3 >= 45",
         (
@@ -46,12 +46,6 @@ EXPRESSION_TEST_DATA = (
 )
 
 
-def map_expression_data(data: Tuple[str, str, Tuple[Tuple[TokenType, str]]]):
-    tokens = tokenize_line(StringCursor(data[1]), 0)[0]
-    expected_stack = tuple({"type": s[0], "matched": s[1]} for s in data[2])
-    return (tokens, expected_stack)
-
-
 @pytest.mark.parametrize(
     "test_tokens, expected_stack",
     argvalues=[map_expression_data(data) for data in EXPRESSION_TEST_DATA],
@@ -60,3 +54,10 @@ def test_expression_from_tokens(test_tokens, expected_stack):
     actual = Expression.from_tokens(test_tokens)
 
     assert_token_lists_equal(actual.expression_stack, expected_stack)
+
+
+def test_objectmacro_tokens():
+    TEST_DATA = (
+        tokenize_line(StringCursor("#define FOOBAR 64")),
+
+    )
