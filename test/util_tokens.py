@@ -52,5 +52,5 @@ def tokenize_string(s: str, line_number: int = 0, cut_directive: bool = True) ->
 
     if cut_directive and tokens[0].token_type is TokenType.DIRECTIVE:
         tokens.pop(0)
-    
+
     return tokens
