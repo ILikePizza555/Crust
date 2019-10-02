@@ -1,5 +1,5 @@
 import pytest # NOQA
-from .test_preprocessor_tokenizer import assert_token_equals
+from .util_tokens import MockToken, assert_token_equals
 from src.useful import StringCursor
 from src.preprocessor.tokenizer import tokenize_line, TokenType
 from src.preprocessor.parser import _expect_directive, _expect_token, UnexpectedTokenError, UnknownPreprocessorDirectiveError
@@ -11,7 +11,7 @@ TEST_TOKENS = tuple(tokenize_line(StringCursor('#define MAC(FOO, BAR) "dir/"##FO
 def test_simple_expect_token():
     actual = _expect_token(list(TEST_TOKENS[1:]), {TokenType.IDENTIFIER, })
 
-    assert_token_equals(actual, TokenType.IDENTIFIER, matched="MAC")
+    assert_token_equals(actual, MockToken(TokenType.IDENTIFIER, match="MAC"))
 
 
 def test_expect_token_failure():
@@ -22,7 +22,7 @@ def test_expect_token_failure():
 def test_simple_expect_directive():
     actual = _expect_directive(list(TEST_TOKENS), "define")
 
-    assert_token_equals(actual, TokenType.DIRECTIVE, matched="#define")
+    assert_token_equals(actual, MockToken(TokenType.DIRECTIVE, match="#define"))
 
 
 def test_expect_directive_failure_on_unexpected_directive():
