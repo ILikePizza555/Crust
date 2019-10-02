@@ -1,5 +1,6 @@
 from typing import List
-from src.preprocessor.tokenizer import Token, TokenType
+from src.preprocessor.tokenizer import Token, TokenType, tokenize_line
+from src.useful import StringCursor
 
 
 def assert_token_equals(actual: Token, type: TokenType, line=None, col=None, matched=None):
@@ -21,3 +22,7 @@ def assert_token_lists_equal(actual: List[Token], expected: List[dict]):
 
     for a, e in zip(actual, expected):
         assert_token_equals(a, **e)
+
+
+def tokenize_string(s: str) -> List[Token]:
+    return tokenize_line(StringCursor(s))
