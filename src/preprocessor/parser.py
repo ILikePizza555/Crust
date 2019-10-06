@@ -227,6 +227,9 @@ class FunctionMacro:
         self.parameters = parameters
         self.value = value
 
+    def __repr__(self):
+        return f"FunctionMacro(identifier={self.identifier}, parameters={self.parameters}, value={self.value})"
+
     def __eq__(self, other):
         return (
             self.identifier == other.identifier and
