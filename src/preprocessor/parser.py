@@ -199,14 +199,14 @@ class FunctionMacro:
         Parses the following syntax:
         IDENTIFIER (IDENTIFIER [, IDENTIFIER]*) TOKENS*
         """
-        identifier = _expect_token(tokens, set(TokenType.IDENTIFIER))
-        _expect_token(tokens, set(TokenType.LPARAN))
+        identifier = _expect_token(tokens, {TokenType.IDENTIFIER, })
+        _expect_token(tokens, {TokenType.LPARAN, })
         parameters = []
 
         try:
             while tokens[0].token_type is not TokenType.RPARAN:
-                parameters.append(_expect_token(tokens, set(TokenType.IDENTIFIER)))
-                _expect_token(tokens, set(TokenType.COMMA))
+                parameters.append(_expect_token(tokens, {TokenType.IDENTIFIER, }))
+                _expect_token(tokens, {TokenType.COMMA, })
         except IndexError:
             raise PreprocessorSyntaxError(identifier.line, 0, "Invalid syntax")
 
