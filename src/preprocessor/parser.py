@@ -203,12 +203,16 @@ class FunctionMacro:
         _expect_token(tokens, {TokenType.LPARAN, })
         parameters = []
 
-        try:
-            while tokens[0].token_type is not TokenType.RPARAN:
-                parameters.append(_expect_token(tokens, {TokenType.IDENTIFIER, }))
-                _expect_token(tokens, {TokenType.COMMA, })
-        except IndexError:
-            raise PreprocessorSyntaxError(identifier.line, 0, "Invalid syntax")
+        while tokens:
+            parameters.append(_expect_token(tokens, {TokenType.IDENTIFIER, }))
+
+            try:
+                e = _expect_token(tokens, {TokenType.COMMA, TokenType.RPARAN})
+            except IndexError:
+                raise PreprocessorSyntaxError(identifier.line, 0, "Expected comma or closing parenthesis.")
+
+            if e.token_type == TokenType.RPARAN:
+                break
 
         remainder = tokens[1 + len(parameters):]
 
