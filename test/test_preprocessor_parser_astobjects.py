@@ -1,8 +1,8 @@
 import pytest
 from .util_testdata import TestData, convert_to_names, convert_to_parameters
 from .util_tokens import MockToken, assert_token_lists_equal, tokenize_string
-from src.preprocessor.parser import Expression, ObjectMacro
-from src.preprocessor.tokenizer import TokenType, Token
+from src.preprocessor.parser import Expression, ObjectMacro, FunctionMacro
+from src.preprocessor.tokenizer import TokenType
 
 
 EXPRESSION_TEST_DATA = (TestData.of_mock_tokens(*x) for x in (
@@ -66,3 +66,15 @@ def test_objectmacro_tokens():
     assert actual == TEST_DATA.expected
 
 
+def test_functionmacro_tokens():
+    TEST_DATA = TestData(
+        "normal",
+        tokenize_string("# FOO(BAR, BAZ) BAR,BAZ"),
+        FunctionMacro("FOO", ["BAR", "BAZ"], [MockToken(*x) for x in (
+                (TokenType.IDENTIFIER, "BAR"), (TokenType.COMMA, ","), (TokenType.IDENTIFIER, "BAZ")
+            )]
+        )
+    )
+
+    actual = FunctionMacro.from_tokens(TEST_DATA.input_data)
+    assert actual == TEST_DATA.expected
