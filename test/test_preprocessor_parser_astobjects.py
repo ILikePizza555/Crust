@@ -1,7 +1,7 @@
 import pytest
 from .util_testdata import TestData, convert_to_names, convert_to_parameters
 from .util_tokens import MockToken, assert_token_lists_equal, tokenize_string
-from src.preprocessor.parser import Expression, ObjectMacro, FunctionMacro, PreprocessorSyntaxError
+from src.preprocessor.parser import Expression, ObjectMacro, FunctionMacro, EvaluatedInclude, PreprocessorSyntaxError
 from src.preprocessor.tokenizer import TokenType
 
 
@@ -85,3 +85,27 @@ def test_functionmacro_tokens_incomplete():
 
     with pytest.raises(PreprocessorSyntaxError):
         FunctionMacro.from_tokens(input_data)
+
+
+EVALUATED_INCLUDE_TEST_DATA = (
+    TestData(
+        "unexpanded",
+        tokenize_string("#include <stdio.h>"),
+        EvaluatedInclude("stdio.h", False)
+    ),
+    TestData(
+        "expanded",
+        tokenize_string("#include \"localprojectfile.h\""),
+        EvaluatedInclude("localprojectfile.h", True)
+    )
+)
+
+
+@pytest.mark.parametrize(
+    "input_tokens,expected",
+    argvalues=convert_to_parameters(EVALUATED_INCLUDE_TEST_DATA),
+    ids=convert_to_names(EVALUATED_INCLUDE_TEST_DATA)
+)
+def test_evaluatedinclude_tokens(input_tokens, expected):
+    actual = EvaluatedInclude.from_tokens(input_tokens)
+    assert actual == expected
