@@ -223,6 +223,13 @@ class FunctionMacro:
         self.parameters = parameters
         self.value = value
 
+    def __eq__(self, other):
+        return (
+            self.identifier == other.identifier and
+            self.parameters == other.parameters and
+            self.value == other.value
+        )
+
 
 class EvaluatedInclude:
     """
