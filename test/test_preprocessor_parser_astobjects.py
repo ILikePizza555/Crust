@@ -1,7 +1,7 @@
 import pytest
 from .util_testdata import TestData, convert_to_names, convert_to_parameters
 from .util_tokens import MockToken, assert_token_lists_equal, tokenize_string
-from src.preprocessor.parser import Expression, ObjectMacro, FunctionMacro
+from src.preprocessor.parser import Expression, ObjectMacro, FunctionMacro, PreprocessorSyntaxError
 from src.preprocessor.tokenizer import TokenType
 
 
@@ -78,3 +78,10 @@ def test_functionmacro_tokens():
 
     actual = FunctionMacro.from_tokens(TEST_DATA.input_data)
     assert actual == TEST_DATA.expected
+
+
+def test_functionmacro_tokens_incomplete():
+    input_data = tokenize_string("# FOO(BAR, BAZ, ERROR")
+
+    with pytest.raises(PreprocessorSyntaxError):
+        FunctionMacro.from_tokens(input_data)
