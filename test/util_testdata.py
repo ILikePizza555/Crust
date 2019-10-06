@@ -1,4 +1,5 @@
 from typing import Generic, TypeVar, Iterable, List, Tuple
+from .util_tokens import MockToken, tokenize_string
 
 
 IT = TypeVar("IT")
@@ -6,6 +7,14 @@ ET = TypeVar("ET")
 
 
 class TestData(Generic[IT, ET]):
+    @classmethod
+    def of_mock_tokens(cls, test_name: str, input_str: str, expected_tokens: tuple):
+        return TestData(
+            test_name,
+            tokenize_string(input_str),
+            tuple(MockToken(*x) for x in expected_tokens)
+        )
+
     def __init__(self, name: str, input_data: IT, expected: ET):
         self.name = name
         self.input_data = input_data
