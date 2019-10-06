@@ -212,12 +212,16 @@ class FunctionMacro:
 
         remainder = tokens[1 + len(parameters):]
 
-        return cls(identifier, parameters, remainder)
+        return cls(
+            identifier.match.group(),
+            [x.match.group() for x in parameters],
+            remainder
+        )
 
-    def __init__(self, identifier: Token, parameters: List[Token], remainder: List[Token]):
+    def __init__(self, identifier: str, parameters: List[str], value: List[Token]):
         self.identifier = identifier
         self.parameters = parameters
-        self.remainder = remainder
+        self.value = value
 
 
 class EvaluatedInclude:
