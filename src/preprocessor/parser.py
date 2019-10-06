@@ -214,12 +214,10 @@ class FunctionMacro:
             if e.token_type == TokenType.RPARAN:
                 break
 
-        remainder = tokens[1 + len(parameters):]
-
         return cls(
             identifier.match.group(),
             [x.match.group() for x in parameters],
-            remainder
+            tokens
         )
 
     def __init__(self, identifier: str, parameters: List[str], value: List[Token]):
