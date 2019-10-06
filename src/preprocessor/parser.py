@@ -245,11 +245,20 @@ class EvaluatedInclude:
     def from_tokens(cls, token_list: List[Token]) -> "EvaluatedInclude":
         parameter_tok = _expect_token(token_list, {TokenType.FILENAME, TokenType.STRING})
 
-        return cls(parameter_tok)
+        return cls(parameter_tok.match.group(1), parameter_tok.token_type is TokenType.STRING)
 
-    def __init__(self, parameter: Token):
-        self.expanded_include = (parameter.token_type is TokenType.STRING)
-        self.include_path = parameter.match.group(1)
+    def __init__(self, include_path: str, expanded_include: bool):
+        self.include_path = include_path
+        self.expanded_include = expanded_include
+
+    def __eq__(self, other):
+        return (
+            self.include_path == other.include_path and
+            self.expanded_include == other.expanded_include
+        )
+
+    def __repr__(self):
+        return f"EvaluatedInclude(include_path={self.include_path}, expanded_include={self.expanded_include})"
 
 
 class DeferedInclude:
