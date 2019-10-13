@@ -1,4 +1,4 @@
-#include <begintest>
+#pragma TEST TESTNAME=SIMPLE_INCLUDE_AND_DEFINE
 #include "non-existant.h"
 
 #define FOOBAR "nice"

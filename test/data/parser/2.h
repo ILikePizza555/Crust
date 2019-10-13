@@ -1,4 +1,4 @@
-#include <begintest>
+#pragma TEST TESTNAME=NESTED_IF_BLOCKS
 #if defined _WIN32
     #include <win32.h>
     #if FOOBAR == 32
