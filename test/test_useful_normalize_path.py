@@ -1,20 +1,28 @@
 import pytest # NOQA
 import unittest
+from pathlib import Path
 from src.useful import normalize_path
+
+
+@pytest.fixture
+def data_dir():
+    return Path(".") / "test" / "data" / "normalize_path"
+
 
 def assert_count_equal(a, b, msg=None):
     case = unittest.TestCase()
     case.assertCountEqual(a, b, msg)
 
-def test_simple_str(shared_datadir):
-    path = str(shared_datadir / "main.c")
+
+def test_simple_str(data_dir):
+    path = str(data_dir / "main.c")
 
     actual = normalize_path(path)
-    assert_count_equal(actual, (shared_datadir / "main.c",))
+    assert_count_equal(actual, (data_dir / "main.c",))
 
 
-def test_str_path_to_dir_with_no_subdir(shared_datadir):
-    dir_path = shared_datadir / "a"
+def test_str_path_to_dir_with_no_subdir(data_dir):
+    dir_path = data_dir / "a"
     assert dir_path.is_dir()
     path = str(dir_path)
 
@@ -22,51 +30,51 @@ def test_str_path_to_dir_with_no_subdir(shared_datadir):
     assert_count_equal(actual, dir_path.iterdir())
 
 
-def test_str_path_to_dir_with_subdir(shared_datadir):
+def test_str_path_to_dir_with_subdir(data_dir):
     # Passing a path to a directory should get all files in the directory, excluding subdirectories
-    path = str(shared_datadir)
+    path = str(data_dir)
     actual = normalize_path(path)
-    assert_count_equal(actual, (p for p in shared_datadir.iterdir() if p.is_file()))
+    assert_count_equal(actual, (p for p in data_dir.iterdir() if p.is_file()))
 
 
-def test_glob_str(shared_datadir):
-    path = str(shared_datadir) + "/**/*.c"
+def test_glob_str(data_dir):
+    path = str(data_dir) + "/**/*.c"
     actual = normalize_path(path)
-    assert_count_equal(actual, shared_datadir.glob("**/*.c"))
+    assert_count_equal(actual, data_dir.glob("**/*.c"))
 
 
-def test_str_iterable(shared_datadir):
+def test_str_iterable(data_dir):
     paths = [
-        str(shared_datadir) + "/a/*",
-        str(shared_datadir) + "/b/include/*",
-        str(shared_datadir) + "/main.c"
+        str(data_dir) + "/a/*",
+        str(data_dir) + "/b/include/*",
+        str(data_dir) + "/main.c"
     ]
     actual = normalize_path(paths)
     assert_count_equal(actual, [
-        shared_datadir / "a/utils.c",
-        shared_datadir / "a/utils.h",
-        shared_datadir / "b/include/convertions.h",
-        shared_datadir / "b/include/network.h",
-        shared_datadir / "b/include/parse_http.h",
-        shared_datadir / "main.c"
+        data_dir / "a/utils.c",
+        data_dir / "a/utils.h",
+        data_dir / "b/include/convertions.h",
+        data_dir / "b/include/network.h",
+        data_dir / "b/include/parse_http.h",
+        data_dir / "main.c"
     ])
 
 
-def test_mixed_iterable(shared_datadir):
+def test_mixed_iterable(data_dir):
     paths = [
-        str(shared_datadir) + "/a/*",
-        shared_datadir / "a" / "utils.h",
-        str(shared_datadir) + "/b/src/*.c",
-        str(shared_datadir) + "/b/include/*.c",
-        shared_datadir / "main.c"
+        str(data_dir) + "/a/*",
+        data_dir / "a" / "utils.h",
+        str(data_dir) + "/b/src/*.c",
+        str(data_dir) + "/b/include/*.c",
+        data_dir / "main.c"
     ]
 
     actual = normalize_path(paths)
     assert_count_equal(actual, [
-        shared_datadir / "a/utils.c",
-        shared_datadir / "a/utils.h",
-        shared_datadir / "b/src/convertions.c",
-        shared_datadir / "b/src/network.c",
-        shared_datadir / "b/src/parse_http.c",
-        shared_datadir / "main.c"
+        data_dir / "a/utils.c",
+        data_dir / "a/utils.h",
+        data_dir / "b/src/convertions.c",
+        data_dir / "b/src/network.c",
+        data_dir / "b/src/parse_http.c",
+        data_dir / "main.c"
     ])
