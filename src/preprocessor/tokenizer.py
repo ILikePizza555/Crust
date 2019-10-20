@@ -1,18 +1,8 @@
 import re
 from enum import Enum, unique, auto
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
+from .exceptions import UnknownTokenError
 from ..useful import StringCursor
-
-
-class UnknownTokenError(Exception):
-    """Exception thrown when an unknown token is encountered during tokenization"""
-    def __init__(self, line_number: int, column_number: int, token: str):
-        self.line_number = line_number
-        self.column_number = column_number
-        self.token = token
-
-    def __str__(self):
-        return f"Unknown token \"{self.token}\" on line {self.line_number}: {self.column_number}"
 
 
 @unique

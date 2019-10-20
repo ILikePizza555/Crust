@@ -1,34 +1,7 @@
 from typing import List, Set, Optional, Union, Callable, Tuple
-from .tokenizer import Token, TokenType, VALUE_TOKENS, RTL_OPS, OPERATOR_TOKENS
+from .tokenizer import Token, TokenType
 from .shunting_yard import shunting_yard_algorithmn
-
-class PreprocessorSyntaxError(Exception):
-    def __init__(self, line_number, column_number, message):
-        self.line_number = line_number
-        self.column_number = column_number
-        self.message = message
-
-    def __str__(self):
-        return f"Syntax error on line {self.line_number}, {self.column_number}: {self.message}"
-
-
-class UnexpectedTokenError(Exception):
-    """Thrown when the preprocessor encounters an unexpected token"""
-    def __init__(self, unexpected_token: Token, expected_set: Set[Token]):
-        self.unexpected_token = unexpected_token
-        self.expected_set = expected_set
-
-    def __str__(self):
-        return f"Unexpected token {self.unexpected_token.error_str}. Expected one of {self.expected_set}"
-
-
-class UnknownPreprocessorDirectiveError(Exception):
-    def __init__(self, line_number: int, directive: str):
-        self.line_number = line_number
-        self.directive = directive
-
-    def __str__(self):
-        return f"Unknown directive on line {self.line_number}, '{self.directive}'."
+from .exceptions import UnexpectedTokenError, UnknownPreprocessorDirectiveError, PreprocessorSyntaxError
 
 
 def _expect_token(tokens: List[Token], expected_types: Set[TokenType], pos: int = 0) -> Token:

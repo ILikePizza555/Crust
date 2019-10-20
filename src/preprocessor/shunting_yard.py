@@ -1,5 +1,5 @@
 from typing import List, Set
-from .parser import PreprocessorSyntaxError
+from .exceptions import PreprocessorSyntaxError
 from .tokenizer import TokenType, Token, RTL_OPS, VALUE_TOKENS, OPERATOR_TOKENS
 
 DEFAULT_PRECIDENCE_MAP = (
