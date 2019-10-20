@@ -374,7 +374,7 @@ class Parser(ParserBase):
 
     def parse_conditional_line(self) -> Tuple[str, Union[Expression, Token, None]]:
         current_line = self.read_current_line()
-        directive = _expect_token(current_line, set(TokenType.DIRECTIVE))
+        directive = _expect_token(current_line, {TokenType.DIRECTIVE, })
         directive_str = directive.match.group(1).upper()
 
         if directive_str in {"IF", "ELIF"}:
