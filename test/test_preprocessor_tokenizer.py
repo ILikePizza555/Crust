@@ -1,5 +1,6 @@
 import pytest # NOQA
-from src.preprocessor.tokenizer import tokenize_line, TokenType, _tokenize_directive, UnknownTokenError
+from pathlib import Path
+from src.preprocessor.tokenizer import tokenize_line, tokenize_file, TokenType, _tokenize_directive, UnknownTokenError
 from src.useful import StringCursor
 from .util_tokens import MockToken, assert_token_equals, assert_token_lists_equal
 
@@ -321,3 +322,14 @@ def test_tokenize_line_escaped_line_endings():
 
     assert_token_lists_equal(actual_list, LINE_ENDINGS_TEST_DATA)
     assert line_offset == 3
+
+
+FILE_TEST_DATA = {
+    "path": Path("./test/data/tokenizer/main.h"),
+    "expected_lines": 7
+}
+
+
+def test_tokenize_file():
+    tokens = tokenize_file(FILE_TEST_DATA["path"])
+    assert len(tokens) == FILE_TEST_DATA["expected_lines"]
