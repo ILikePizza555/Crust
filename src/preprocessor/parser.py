@@ -169,7 +169,7 @@ class Expression:
                 operand_stack.append(token)
             elif token.token_type is TokenType.DEFINED:
                 i = _expect_token(operand_stack, {TokenType.IDENTIFIER, }, -1)
-                operand_stack.append(i in variable_map.keys())
+                operand_stack.append(i.match.group() in variable_map.keys())
 
         return operand_stack[0]
 
