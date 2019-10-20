@@ -2,7 +2,7 @@ import pytest # NOQA
 import logging
 from pathlib import Path
 from src.preprocessor.tokenizer import tokenize_file
-from src.preprocessor.parser import Parser, EvaluatedInclude, ObjectMacro
+from src.preprocessor.parser import Parser, EvaluatedInclude, ObjectMacro, ConditionalBranch
 
 
 class ParserTestData():
@@ -67,3 +67,8 @@ def test_simple(setup_test):
 def test_nested_if_blocks(setup_test):
     data, token_lines, parser = setup_test("NESTED_IF_BLOCKS")
     ast = parser.parse_lines()
+    conditional_branches = ast[1]
+
+    assert len(conditional_branches) == 3
+    for item in conditional_branches:
+        assert isinstance(item, ConditionalBranch)
