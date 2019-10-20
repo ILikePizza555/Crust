@@ -2,7 +2,7 @@ import pytest # NOQA
 import logging
 from pathlib import Path
 from src.preprocessor.tokenizer import tokenize_file
-from src.preprocessor.parser import Parser
+from src.preprocessor.parser import Parser, EvaluatedInclude, ObjectMacro
 
 
 class ParserTestData():
@@ -43,3 +43,22 @@ def load_test_file(filepath) -> ParserTestData:
 
 TEST_DATA_DIRECTORY = Path("./test/data/parser")
 TEST_DATA = {test.name: test for test in (load_test_file(t) for t in TEST_DATA_DIRECTORY.iterdir())}
+
+
+@pytest.fixture
+def setup_test():
+    def _setup_test(testname: str):
+        data = TEST_DATA[testname]
+        tokens = tokenize_file(data.path)
+        parser = Parser(tokens)
+        return (data, tokens, parser)
+    return _setup_test
+
+
+def test_simple(setup_test):
+    data, token_lines, parser = setup_test("SIMPLE_INCLUDE_AND_DEFINE")
+    ast = parser.parse_lines()
+
+    assert ast[1] == EvaluatedInclude("non-existant.h", True)
+    assert isinstance(ast[2], ObjectMacro)
+    assert ast[2].identifier == "FOOBAR"
