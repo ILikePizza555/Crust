@@ -4,9 +4,11 @@
 #define OBJECT_MACRO 42
 #define FUNC_MACRO(FOO, BAR) FOO # BAR
 
+
+
 #if OBJECT_MACRO == 42
-    #define SPLIT_LINES a, b, c \
-                        d, e, f \
+    #define SPLIT_LINES a, b, c, \
+                        d, e, f, \
                         g, h, i
 #endif
 

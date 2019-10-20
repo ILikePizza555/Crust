@@ -326,10 +326,23 @@ def test_tokenize_line_escaped_line_endings():
 
 FILE_TEST_DATA = {
     "path": Path("./test/data/tokenizer/main.h"),
-    "expected_lines": 7
+    "expected_lines": 7,
+    "expected_identifiers": [
+        "#include",
+        "#include",
+        "#define",
+        "#define",
+        "#if",
+        "#define",
+        "#endif"
+    ]
 }
 
 
 def test_tokenize_file():
     tokens = tokenize_file(FILE_TEST_DATA["path"])
     assert len(tokens) == FILE_TEST_DATA["expected_lines"]
+
+    for n, line in enumerate(tokens):
+        assert line[0].token_type == TokenType.DIRECTIVE
+        assert line[0].match.group() == FILE_TEST_DATA["expected_identifiers"][n]
