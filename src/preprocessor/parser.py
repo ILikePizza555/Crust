@@ -396,6 +396,9 @@ class Parser(ParserBase):
             while self._current_line < end:
                 children.append(self.parse_next())
 
+            if self.peek_directive() == "endif":
+                self.read_current_line()
+
             branches.append(ConditionalBranch(children, value))
 
         return branches
