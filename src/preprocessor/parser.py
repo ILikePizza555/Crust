@@ -303,6 +303,10 @@ class ParserBase():
         assert peek_directive_tok.token_type is TokenType.DIRECTIVE
         return peek_directive_tok.match.group(1)
 
+    def _parse_ignore(self):
+        self._read_current_line()
+        return None
+
     @property
     def done(self):
         return self._current_line >= len(self._lines)
@@ -333,7 +337,8 @@ class Parser(ParserBase):
             "define": self.parse_define_line,
             "if": self.parse_if_block,
             "ifdef": self.parse_if_block,
-            "ifndef": self.parse_if_block
+            "ifndef": self.parse_if_block,
+            "pragma": self._parse_ignore
         })
 
     def parse_include_line(self) -> Union[EvaluatedInclude, DeferedInclude]:
