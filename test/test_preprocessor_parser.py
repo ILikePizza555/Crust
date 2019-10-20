@@ -62,3 +62,8 @@ def test_simple(setup_test):
     assert ast[1] == EvaluatedInclude("non-existant.h", True)
     assert isinstance(ast[2], ObjectMacro)
     assert ast[2].identifier == "FOOBAR"
+
+
+def test_nested_if_blocks(setup_test):
+    data, token_lines, parser = setup_test("NESTED_IF_BLOCKS")
+    ast = parser.parse_lines()
