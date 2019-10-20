@@ -161,6 +161,18 @@ class Expression:
     def __init__(self, expression_stack: List[Token]):
         self.expression_stack = expression_stack
 
+    def evaluate(self, variable_map: dict):
+        operand_stack = []
+
+        for token in self.expression_stack:
+            if token.token_type in VALUE_TOKENS:
+                operand_stack.append(token)
+            elif token.token_type is TokenType.DEFINED:
+                i = _expect_token(operand_stack, {TokenType.IDENTIFIER, }, -1)
+                operand_stack.append(i in variable_map.keys())
+
+        return operand_stack[0]
+
 
 class ObjectMacro:
     """
