@@ -385,7 +385,7 @@ class Parser(ParserBase):
             return (directive_str, None)
 
     def parse_if_block(self) -> List[ConditionalBranch]:
-        block_markers = ((x[1], x[2]) for x in self._read_conditional_block() if x[0] == 1)
+        block_markers = [(x[1], x[2]) for x in self._read_conditional_block() if x[0] == 1]
         block_ranges = ((a[1], b[1]) for a, b in zip(block_markers, block_markers[1:]))
         branches: List[ConditionalBranch] = []
 
