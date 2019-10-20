@@ -161,18 +161,6 @@ class Expression:
     def __init__(self, expression_stack: List[Token]):
         self.expression_stack = expression_stack
 
-    def evaluate(self, variable_map: dict):
-        operand_stack = []
-
-        for token in self.expression_stack:
-            if token.token_type in VALUE_TOKENS:
-                operand_stack.append(token)
-            elif token.token_type is TokenType.DEFINED:
-                i = _expect_token(operand_stack, {TokenType.IDENTIFIER, }, -1)
-                operand_stack.append(i.match.group() in variable_map.keys())
-
-        return operand_stack[0]
-
 
 class ObjectMacro:
     """
@@ -312,7 +300,7 @@ class ParserBase():
         """Returns the next n lines and increments the line counter."""
         self._current_line = min(self._current_line + n, len(self._lines))
         return self._lines[self._current_line - n:self._current_line]
-    
+
     def read_current_line(self):
         """Returns the next line and increments the line counter."""
         ret = self.read_next_lines(1)
