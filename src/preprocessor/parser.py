@@ -288,27 +288,32 @@ class ParserBase():
         self._current_line = 0
         self.parse_methods: dict[str, Callable[None, ASTObject]] = dict()
 
-    def _peak_current_line(self) -> List[Token]:
+    def peak_current_line(self) -> List[Token]:
+        """Returns the current line without incrementing the line counter"""
         return self._lines[self._current_line]
 
-    def _get_current_line_number(self) -> int:
-        return self._peak_current_line()[0].line
+    def get_current_line_number(self) -> int:
+        """Returns the line number of the the current token."""
+        return self.peak_current_line()[0].line
 
-    def _read_next_lines(self, n: int):
+    def read_next_lines(self, n: int):
+        """Returns the next n lines and increments the line counter."""
         self._current_line = min(self._current_line + n, len(self._lines))
         return self._lines[self._current_line - n:self._current_line]
     
-    def _read_current_line(self):
-        ret = self._read_next_lines(1)
+    def read_current_line(self):
+        """Returns the next line and increments the line counter."""
+        ret = self.read_next_lines(1)
         return ret[0] if ret else []
 
-    def _peek_directive(self) -> str:
-        peek_directive_tok = self._peak_current_line()[0]
+    def peek_directive(self) -> str:
+        """Looks at the current line's directive and returns it."""
+        peek_directive_tok = self.peak_current_line()[0]
         assert peek_directive_tok.token_type is TokenType.DIRECTIVE
         return peek_directive_tok.match.group(1)
 
     def _parse_ignore(self):
-        self._read_current_line()
+        self.read_current_line()
         return None
 
     @property
@@ -318,10 +323,10 @@ class ParserBase():
     def parse_next(self) -> Optional[ASTObject]:
         try:
             if not self.done:
-                parse_method = self.parse_methods[self._peek_directive()]
+                parse_method = self.parse_methods[self.peek_directive()]
                 return parse_method()
         except KeyError:
-            raise UnknownPreprocessorDirectiveError(self._get_current_line_number(), self._peek_directive())
+            raise UnknownPreprocessorDirectiveError(self.get_current_line_number(), self.peek_directive())
 
     def parse_lines(self) -> List[ASTObject]:
         object_return = []
@@ -347,7 +352,7 @@ class Parser(ParserBase):
         })
 
     def parse_include_line(self) -> Union[EvaluatedInclude, DeferedInclude]:
-        current_line = self._read_current_line()
+        current_line = self.read_current_line()
         _expect_directive(current_line, "include")
 
         param = _expect_token(current_line, {TokenType.IDENTIFIER, TokenType.STRING, TokenType.FILENAME})
@@ -358,7 +363,7 @@ class Parser(ParserBase):
             return DeferedInclude(param)
 
     def parse_define_line(self) -> Union[FunctionMacro, ObjectMacro]:
-        current_line = self._read_current_line()
+        current_line = self.read_current_line()
         _expect_directive(current_line, "define")
 
         # TODO: Better syntax error handling
@@ -368,7 +373,7 @@ class Parser(ParserBase):
             return ObjectMacro.from_tokens(current_line)
 
     def parse_conditional_line(self) -> Tuple[str, Union[Expression, Token, None]]:
-        current_line = self._read_current_line()
+        current_line = self.read_current_line()
         directive = _expect_token(current_line, set(TokenType.DIRECTIVE))
         directive_str = directive.match.group(1).upper()
 
