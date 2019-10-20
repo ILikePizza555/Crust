@@ -294,9 +294,13 @@ class ParserBase():
     def _get_current_line_number(self) -> int:
         return self._peak_current_line()[0].line
 
-    def _read_current_line(self, n: int = 1):
+    def _read_next_lines(self, n: int):
         self._current_line = min(self._current_line + n, len(self._lines))
         return self._lines[self._current_line - n:self._current_line]
+    
+    def _read_current_line(self):
+        ret = self._read_next_lines(1)
+        return ret[0] if ret else []
 
     def _peek_directive(self) -> str:
         peek_directive_tok = self._peak_current_line()[0]
@@ -314,7 +318,8 @@ class ParserBase():
     def parse_next(self) -> Optional[ASTObject]:
         try:
             if not self.done:
-                return self.parse_methods[self._peek_directive()]()
+                parse_method = self.parse_methods[self._peek_directive()]
+                return parse_method()
         except KeyError:
             raise UnknownPreprocessorDirectiveError(self._get_current_line_number(), self._peek_directive())
 
@@ -348,7 +353,7 @@ class Parser(ParserBase):
         param = _expect_token(current_line, {TokenType.IDENTIFIER, TokenType.STRING, TokenType.FILENAME})
 
         try:
-            return EvaluatedInclude(param)
+            return EvaluatedInclude.from_tokens([param])
         except PreprocessorSyntaxError:
             return DeferedInclude(param)
 
@@ -358,7 +363,7 @@ class Parser(ParserBase):
 
         # TODO: Better syntax error handling
         try:
-            return FunctionMacro.from_tokens(current_line)
+            return FunctionMacro.from_tokens(current_line[:])
         except UnexpectedTokenError:
             return ObjectMacro.from_tokens(current_line)
 
