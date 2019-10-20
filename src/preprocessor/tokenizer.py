@@ -38,6 +38,7 @@ class TokenType(Enum):
     LESS_THAN = auto()
     GREATER_THAN = auto()
     NOT = auto()
+    ASSIGNMENT = auto()
     TOKEN_STRINGIFICATION = auto()
 
 
@@ -77,6 +78,7 @@ TOKEN_MAP = (
     (TokenType.GREATER_THAN,            re.compile(r">")),
     (TokenType.NOT,                     re.compile(r"!")),
     (TokenType.TOKEN_STRINGIFICATION,   re.compile(r"#")),
+    (TokenType.ASSIGNMENT,              re.compile(r"=")),
     (TokenType.IDENTIFIER,              re.compile(r"^(\w+)"))
 )
 
