@@ -104,5 +104,5 @@ class StringCursor:
         return self._string[self._pos:n]
 
     @staticmethod
-    def read_whitespace(inst: "StringCursor"):
-        return inst.read_until(lambda s: s[0] not in set(string.whitespace))
+    def read_whitespace(inst: "StringCursor", exceptions: set = set()):
+        return inst.read_until(lambda s: s[0] not in (set(string.whitespace) - exceptions))

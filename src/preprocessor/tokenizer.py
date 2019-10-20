@@ -1,6 +1,6 @@
 import re
 from enum import Enum, unique, auto
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 from ..useful import StringCursor
 
 
@@ -130,25 +130,38 @@ def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], 
         cursor.read_until("\n")
 
     while(cursor.peak() != "\n" and not cursor.done()):
-        StringCursor.read_whitespace(cursor)
+        StringCursor.read_whitespace(cursor, {"\n", })
         return_tokens.append(_read_next_token(cursor, line_number + line_offset))
-        StringCursor.read_whitespace(cursor)
+        StringCursor.read_whitespace(cursor, {"\n", })
 
         if cursor.peak(2) == "\\\n":
             cursor.read(2)
             line_offset += 1
 
+    if cursor.peak() == "\n":
+        cursor.read()
+
     return (return_tokens, line_offset + 1)
 
 
-def tokenize_file(file: str) -> List[List[Token]]:
-    cursor = StringCursor(file)
+def tokenize_file(filepath) -> List[List[Token]]:
+    with open(filepath) as file:
+        cursor = StringCursor(file.read())
+
     return_tokens = []
     line_counter = 0
 
     while(not cursor.done()):
+        # Cleaning up any indentation
+        StringCursor.read_whitespace(cursor)
+
         tokens, lines = tokenize_line(cursor, line_counter)
-        return_tokens.append(tokens)
+        if tokens:
+            return_tokens.append(tokens)
         line_counter += lines
+
+        # Cleaning up and counting blank lines
+        blank_lines = cursor.read_until(lambda s: s[0] != "\n")
+        line_counter += len(blank_lines)
 
     return return_tokens
