@@ -105,3 +105,5 @@ def shunting_yard_algorithmn(tokens: List[Token],
 
     # Push all remaining operators on output stack. Note that list.extends is not used to check for mismatched parenthesis
     _push_operator_stack(operator_stack, output_stack)
+
+    return output_stack
