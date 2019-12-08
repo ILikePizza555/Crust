@@ -1,1 +1,0 @@
-double doMath(double, double);
