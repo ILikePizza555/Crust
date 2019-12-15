@@ -29,8 +29,13 @@ class LogicalLine:
 
     def __str__(self):
         return "".join((x[1] for x in self.segments))
-    
-    @property
-    def segments(self) -> List[Tuple[int, str]]:
-        """
-        Gets the various physical line segments 
+
+    def __eq__(self, other) -> bool:
+        if len(self.segments) != len(other.segments):
+            return False
+        
+        for a, b in zip(self.segments, other.segments):
+            if a[0] != b[0] or a[1] != b[1]:
+                return False
+
+        return True
