@@ -17,14 +17,15 @@ class LogicalLine:
         current_segments: List[Tuple[int, str]] = []
 
         for physical_line_index, value in enumerate(lines):
-            current_line.append((physical_line_index, value.strip("\\")))
+            current_segments.append((physical_line_index, value.strip("\\")))
 
             if not value.endswith("\\"):
                 rv.append(cls(current_segments))
+                current_segments = []
 
         return rv
 
-    def __init__(self, segments: list):
+    def __init__(self, segments: List[Tuple[int, str]]):
         self.segments = segments
 
     def __str__(self):
