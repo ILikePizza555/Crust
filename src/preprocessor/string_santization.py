@@ -8,7 +8,7 @@ from typing import List, Tuple
 class LogicalLine:
     """
     Represents a logical line. Holds the physical lines (and indices) that make up the logical line.
-    """ 
+    """
 
     @classmethod
     def splice_lines(cls, file_text: str) -> List["LogicalLine"]:
@@ -28,13 +28,16 @@ class LogicalLine:
     def __init__(self, segments: List[Tuple[int, str]]):
         self.segments = segments
 
+    def __len__(self):
+        return sum(map(len, self.segments))
+
     def __str__(self):
         return "".join((x[1] for x in self.segments))
 
     def __eq__(self, other) -> bool:
         if len(self.segments) != len(other.segments):
             return False
-        
+
         for a, b in zip(self.segments, other.segments):
             if a[0] != b[0] or a[1] != b[1]:
                 return False

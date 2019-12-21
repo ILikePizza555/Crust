@@ -6,12 +6,14 @@ from src.preprocessor.string_santization import LogicalLine
 def test_str_single():
     actual = str(LogicalLine([(0, "oh")]))
     assert actual == "oh"
+    assert len(actual) == 2
 
 
 def test_str_multiple():
     data = LogicalLine([(0, "trans girls, "), (1, "trans boys, "), (2, "and enbies "), (3, "are all valid")])
     actual = str(data)
     assert actual == "trans girls, trans boys, and enbies are all valid"
+    assert len(actual) == 49
 
 
 LINE_SPLICING_MATRIX = NamedTestMatrix(
