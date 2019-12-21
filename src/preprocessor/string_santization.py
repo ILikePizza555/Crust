@@ -29,7 +29,7 @@ class LogicalLine:
         self.segments = segments
 
     def __len__(self):
-        return sum(map(len, self.segments))
+        return sum(map(lambda x: len(x[1]), self.segments))
 
     def __str__(self):
         return "".join((x[1] for x in self.segments))
