@@ -3,6 +3,7 @@ Implementation for phase 1 and 2 of the C preprocessor. It replaces escape seque
 and converts physical source lines to logical ones. Note that tokenization has not begun.
 """
 from typing import List, Tuple
+from itertools import accumulate, chain
 
 
 class LogicalLine:
@@ -27,12 +28,27 @@ class LogicalLine:
 
     def __init__(self, segments: List[Tuple[int, str]]):
         self.segments = segments
+        self.lengths: List[int] = list(accumulate(chain((0,), (len(x[1]) for x in self.segments))))
 
     def __len__(self):
-        return sum(map(lambda x: len(x[1]), self.segments))
+        return self.lengths[-1]
 
     def __str__(self):
         return "".join((x[1] for x in self.segments))
+
+    def __getitem__(self, index):
+        if type(index) == int:
+            i = self._get_segment_from_index(index)
+            segment = self.segments[i]
+            length = self.lengths[i]
+            return segment[1][index - length]
+
+        i_start = self._get_segment_from_index(index.start)
+        i_stop = self._get_segment_from_index(index.stop)
+        length = self.lengths[i_start]
+
+        segment_str = "".join(x[1] for x in self.segments[i_start:i_stop])
+        return segment_str[index.start - length:index.stop - length:index.step]
 
     def __eq__(self, other) -> bool:
         if len(self.segments) != len(other.segments):
@@ -43,3 +59,9 @@ class LogicalLine:
                 return False
 
         return True
+
+    def _get_segment_from_index(self, index):
+        if index >= self.lengths[-1]:
+            raise IndexError(f"Index {index} is larger than length {self.lengths[-1]}")
+        
+        return next(i - 1 for i, length in enumerate(self.lengths) if index < length)

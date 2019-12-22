@@ -21,9 +21,24 @@ def test_len_single_segment():
 
 
 def test_len_multi_segments():
-    data = "test string 42"
+    data = "test string 24"
     test_object = LogicalLine([(0, "test "), (1, "string "), (2, "42")])
     assert len(test_object) == len(data)
+
+
+GET_ITEM_TEST_MATRIX = NamedTestMatrix(
+    ("test_object", "test_range", "expected_str"),
+    (
+        ("single seg int",      LogicalLine([(0, "some body once told me")]),               5,              "b"),
+        ("single seg range",    LogicalLine([(0, "the world was gonna roll me")]),          range(3, 9),    "world"),
+        ("multi seg in",        LogicalLine([(0, "i ain't "), (1, "the sharpest tool")]),   9,              "h"),
+        ("multi seg range",     LogicalLine([(0, "in the shed"), (1, "she was looking")]),  range(8, 16)    "edshe wa")
+    )
+)
+@pytest.mark.parametrize(GET_ITEM_TEST_MATRIX.arg_names, GET_ITEM_TEST_MATRIX.arg_values, ids=GET_ITEM_TEST_MATRIX.test_names)
+def test_get_item(test_object, test_range, expected_str):
+    actual = test_object[test_range]
+    assert actual == expected_str
 
 
 LINE_SPLICING_MATRIX = NamedTestMatrix(
