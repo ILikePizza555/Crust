@@ -45,9 +45,9 @@ class LogicalLine:
 
         segment_start, segment_end, segments = self._map_string_range_to_segments(index)
         segment_str = "".join(x[1] for x in segments)
-        starting_length = self._acc_lengths[max(segment_start - 1, 0)]
 
-        return segment_str[index.start - starting_length:index.stop - starting_length:index.step]
+        index_correction = self._acc_lengths[segment_start - 1] if segment_start > 0 else 0
+        return segment_str[index.start - index_correction:index.stop - index_correction:index.step]
 
     def __eq__(self, other) -> bool:
         if len(self.segments) != len(other.segments):
@@ -64,10 +64,10 @@ class LogicalLine:
             raise IndexError(f"Index {string_index} is larger than length {len(self)}")
 
         length_iter = (i for i, length in enumerate(self._acc_lengths) if string_index < length)
-        return max(length_iter)
+        return next(length_iter)
 
     def _map_string_range_to_segments(self, string_range: range):
         start_index = self._map_string_index_to_segment_index(string_range.start)
         end_index = self._map_string_index_to_segment_index(string_range.stop)
 
-        return (start_index, end_index, self.segments[start_index:end_index])
+        return (start_index, end_index, self.segments[start_index:end_index +  1])

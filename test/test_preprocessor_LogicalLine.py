@@ -30,9 +30,11 @@ GET_ITEM_TEST_MATRIX = NamedTestMatrix(
     ("test_object", "test_range", "expected_str"),
     (
         ("single seg int",      LogicalLine([(0, "some body once told me")]),               5,              "b"),
-        ("single seg range",    LogicalLine([(0, "the world was gonna roll me")]),          range(3, 9),    "world"),
-        ("multi seg in",        LogicalLine([(0, "i ain't "), (1, "the sharpest tool")]),   9,              "h"),
-        ("multi seg range",     LogicalLine([(0, "in the shed"), (1, "she was looking")]),  range(8, 16)    "edshe wa")
+        ("single seg range",    LogicalLine([(0, "the world was gonna roll me")]),          range(4, 9),    "world"),
+        ("dual seg in",         LogicalLine([(0, "i ain't "), (1, "the sharpest tool")]),   9,              "h"),
+        ("dual seg range",      LogicalLine([(0, "in the shed"), (1, "she was looking")]),  range(8, 16),   "hedshe w"),
+        ("tri seg range",       LogicalLine([(0, "kinda dumb"), (1, "with her finger and her"), (2, "thumb in")]),   range(9, 36),   "bwith her finger and herthu"),
+        ("index correction",    LogicalLine([(0, "the shape"), (1, "of an L on"), (2, "her forehead")]), range(21, 25), "r fo")
     )
 )
 @pytest.mark.parametrize(GET_ITEM_TEST_MATRIX.arg_names, GET_ITEM_TEST_MATRIX.arg_values, ids=GET_ITEM_TEST_MATRIX.test_names)
