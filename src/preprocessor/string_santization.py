@@ -3,7 +3,7 @@ Implementation for phase 1 and 2 of the C preprocessor. It replaces escape seque
 and converts physical source lines to logical ones. Note that tokenization has not begun.
 """
 from typing import List, Tuple
-from itertools import accumulate, chain
+from itertools import accumulate
 
 
 class LogicalLine:
