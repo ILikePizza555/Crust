@@ -28,27 +28,26 @@ class LogicalLine:
 
     def __init__(self, segments: List[Tuple[int, str]]):
         self.segments = segments
-        self.lengths: List[int] = list(accumulate(chain((0,), (len(x[1]) for x in self.segments))))
+        self._acc_lengths: List[int] = list(accumulate((len(x[1]) for x in self.segments)))
 
     def __len__(self):
-        return self.lengths[-1]
+        return self._acc_lengths[-1]
 
     def __str__(self):
         return "".join((x[1] for x in self.segments))
 
     def __getitem__(self, index):
         if type(index) == int:
-            i = self._get_segment_from_index(index)
-            segment = self.segments[i]
-            length = self.lengths[i]
+            seg_index = self._map_string_index_to_segment_index(index)
+            segment = self.segments[seg_index]
+            length = self._acc_lengths[seg_index]
             return segment[1][index - length]
 
-        i_start = self._get_segment_from_index(index.start)
-        i_stop = self._get_segment_from_index(index.stop)
-        length = self.lengths[i_start]
+        segment_start, segment_end, segments = self._map_string_range_to_segments(index)
+        segment_str = "".join(x[1] for x in segments)
+        starting_length = self._acc_lengths[max(segment_start - 1, 0)]
 
-        segment_str = "".join(x[1] for x in self.segments[i_start:i_stop])
-        return segment_str[index.start - length:index.stop - length:index.step]
+        return segment_str[index.start - starting_length:index.stop - starting_length:index.step]
 
     def __eq__(self, other) -> bool:
         if len(self.segments) != len(other.segments):
@@ -60,8 +59,15 @@ class LogicalLine:
 
         return True
 
-    def _get_segment_from_index(self, index):
-        if index >= self.lengths[-1]:
-            raise IndexError(f"Index {index} is larger than length {self.lengths[-1]}")
-        
-        return next(i - 1 for i, length in enumerate(self.lengths) if index < length)
+    def _map_string_index_to_segment_index(self, string_index: int):
+        if string_index >= len(self):
+            raise IndexError(f"Index {string_index} is larger than length {len(self)}")
+
+        length_iter = (i for i, length in enumerate(self._acc_lengths) if string_index < length)
+        return max(length_iter)
+
+    def _map_string_range_to_segments(self, string_range: range):
+        start_index = self._map_string_index_to_segment_index(string_range.start)
+        end_index = self._map_string_index_to_segment_index(string_range.stop)
+
+        return (start_index, end_index, self.segments[start_index:end_index])
