@@ -70,4 +70,4 @@ class LogicalLine:
         start_index = self._map_string_index_to_segment_index(string_range.start)
         end_index = self._map_string_index_to_segment_index(string_range.stop)
 
-        return (start_index, end_index, self.segments[start_index:end_index +  1])
+        return (start_index, end_index, self.segments[start_index:end_index + 1])
