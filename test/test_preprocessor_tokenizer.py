@@ -3,7 +3,7 @@ from .utilities import NamedTestMatrix
 from src.preprocessor.tokenizer import Token, TokenType, tokenize_line
 
 SINGLE_TOKEN_TESTS = NamedTestMatrix(
-    ("input_str", "expected_token"),
+    ("input_str", "expected_type"),
     (
         ("whitespace",  "\t",       TokenType.WHITESPACE),
         ("directive",   "#define",  TokenType.DIRECTIVE),
