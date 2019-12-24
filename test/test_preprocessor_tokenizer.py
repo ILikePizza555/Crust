@@ -25,3 +25,14 @@ def test_single_tokens(input_str, expected_type):
     actual = tokenize_line(input_str)
     assert len(actual) == 1
     assert actual[0].type == expected_type
+
+
+def test_tokenize_line():
+    actual = tokenize_line("#define uwu 420")
+    expected = [
+        (TokenType.DIRECTIVE, "#define"), (TokenType.WHITESPACE, " "),
+        (TokenType.IDENTIFIER, "uwu"), (TokenType.WHITESPACE, " "), (TokenType.NUM_LITERAL, "420")]
+
+    for a, e in zip(actual, expected):
+        assert a.type == e[0]
+        assert a.value.group(0) == e[1]
