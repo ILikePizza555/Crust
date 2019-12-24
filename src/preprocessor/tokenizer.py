@@ -54,6 +54,12 @@ class Token():
         self.col = col
         self.line = line
 
+    def __eq__(self, o):
+        return (self.type == o.type and
+                self.value == o.value and
+                self.col == o.col and
+                self.line == o.line)
+
     def __repr__(self):
         return f"Token(ttype: {self.type}, value: {self.value}, col: {self.col}, line: {self.line})"
 
