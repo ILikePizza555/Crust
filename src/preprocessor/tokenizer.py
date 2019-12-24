@@ -42,6 +42,7 @@ TOKEN_MAP = (
     (re.compile(r"\)"),             TokenType.RPAREN),
     (re.compile(r","),              TokenType.COMMA),
     (re.compile(r"#"),              TokenType.OP_JOIN),
+    (re.compile(r"!"),              TokenType.OP_NOT),
     (re.compile(r"[a-zA-Z]\w+"),    TokenType.IDENTIFIER),
     (re.compile(r"\S+"),            TokenType.GENERIC)
 )
@@ -64,7 +65,7 @@ class Token():
         return f"Token(ttype: {self.type}, value: {self.value}, col: {self.col}, line: {self.line})"
 
 
-def tokenize_line_iter(line: str, line_num: int = 0) -> Generator[Token]:
+def tokenize_line_iter(line: str, line_num: int = 0):
     cursor = 0
 
     while cursor < len(line):
@@ -72,7 +73,7 @@ def tokenize_line_iter(line: str, line_num: int = 0) -> Generator[Token]:
         match, token_type = next(x for x in match_generator if x[0] is not None)
 
         if match is not None:
-            y = Token(token_type, match, cursor, line_num))
+            y = Token(token_type, match, cursor, line_num)
             cursor += len(match.group(0))
             yield y
         else:
