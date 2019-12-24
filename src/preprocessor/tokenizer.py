@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Optional, List
+from typing import Optional, List, Generator
 import re
 
 
@@ -35,11 +35,11 @@ TOKEN_MAP = (
     (re.compile(r"!="),             TokenType.OP_NEQ),
     (re.compile(r"<="),             TokenType.OP_LTE),
     (re.compile(r">="),             TokenType.OP_GTE),
-    (re.compile(r"##"),             TokenType.OP_CONCAT)
+    (re.compile(r"##"),             TokenType.OP_CONCAT),
     (re.compile(r"<"),              TokenType.OP_LT),
     (re.compile(r">"),              TokenType.OP_GT),
-    (re.compile(r"("),              TokenType.LPAREN),
-    (re.compile(r")"),              TokenType.RPAREN),
+    (re.compile(r"\("),             TokenType.LPAREN),
+    (re.compile(r"\)"),             TokenType.RPAREN),
     (re.compile(r","),              TokenType.COMMA),
     (re.compile(r"#"),              TokenType.OP_JOIN),
     (re.compile(r"[a-zA-Z]\w+"),    TokenType.IDENTIFIER),
@@ -48,26 +48,30 @@ TOKEN_MAP = (
 
 
 class Token():
-    def __init__(self, type: TokenType, value: Optional[re.Match] = None, col: int = 0, line: int = 0):
-        self.type = type
+    def __init__(self, ttype: TokenType, value: Optional[re.Match] = None, col: int = 0, line: int = 0):
+        self.type = ttype
         self.value = value
         self.col = col
         self.line = line
 
+    def __repr__(self):
+        return f"Token(ttype: {self.type}, value: {self.value}, col: {self.col}, line: {self.line})"
 
-def tokenize_line(line: str, line_num: int = 0) -> List[Token]:
+
+def tokenize_line_iter(line: str, line_num: int = 0) -> Generator[Token]:
     cursor = 0
-    rv: List[Token] = []
 
     while cursor < len(line):
-        for regex, token_type in TOKEN_MAP:
-            match = regex.match(line, cursor)
+        match_generator = ((regex.match(line, cursor), token_type) for regex, token_type in TOKEN_MAP)
+        match, token_type = next(x for x in match_generator if x[0] is not None)
 
-            if match is not None:
-                rv.append(Token(token_type, match, cursor, line_num))
-                cursor += len(match.group(0))
-                break
+        if match is not None:
+            y = Token(token_type, match, cursor, line_num))
+            cursor += len(match.group(0))
+            yield y
+        else:
+            raise Exception("This should never happen. Unknown tokens are Generic.")
 
-        raise Exception("This should never be reached.")
 
-    return rv
+def tokenize_line(line: str, line_num: int = 0) -> List[Token]:
+    return list(tokenize_line_iter(line, line_num))
