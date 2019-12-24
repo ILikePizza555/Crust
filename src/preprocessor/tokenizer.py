@@ -20,6 +20,8 @@ class TokenType(Enum):
     OP_LTE = auto()
     OP_GTE = auto()
     OP_NOT = auto()
+    OP_AND = auto()
+    OP_OR = auto()
     OP_DEFINED = auto()
     OP_JOIN = auto()
     OP_CONCAT = auto()
@@ -35,6 +37,8 @@ TOKEN_MAP = (
     (re.compile(r"!="),             TokenType.OP_NEQ),
     (re.compile(r"<="),             TokenType.OP_LTE),
     (re.compile(r">="),             TokenType.OP_GTE),
+    (re.compile(r"&&"),             TokenType.OP_AND),
+    (re.compile(r"||"),             TokenType.OP_OR),
     (re.compile(r"##"),             TokenType.OP_CONCAT),
     (re.compile(r"<"),              TokenType.OP_LT),
     (re.compile(r">"),              TokenType.OP_GT),
