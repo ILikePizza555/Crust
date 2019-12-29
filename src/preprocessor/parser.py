@@ -30,3 +30,16 @@ def expect_token(token: Token, expectation: Union[TokenType, Iterable[TokenType]
         raise ValueError("Expected {token} to be of type {expected}")
 
     return token
+
+
+class IncludeDirective:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token], identifier_table: IdentifierTable):
+        path = expect_token(tokens[0], {TokenType.STRING_LITERAL, TokenType.IDENTIFIER})
+
+        if path.type is TokenType.STRING_LITERAL:
+            return cls(path.value.group(1), path.value.group(0).startswith("\""))
+    
+    def __init__(self, path: str, expanded: bool):
+        self.path = path
+        self.expanded = expanded
