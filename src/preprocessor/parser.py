@@ -1,10 +1,9 @@
 from typing import Union, Iterable, Dict, List, Optional, Set
-from .tokenizer import TokenType, Token, COMPARISON_OPERATOR_TYPES, BOOLEAN_OPERATOR_TYPES, COMPARISON_OPERATOR_TYPES, OPERATOR_TYPES, LITERAL_TYPES
-from .shunting_yard import ShuntingYard
+from .tokenizer import TokenType, Token
 
 
 Literal = Union[str, int, float]
-DefineMap = Dict[str, Literal]
+IdentifierTable = Dict[str, Literal]
 
 
 def parse_literal(literal_token: Token) -> Literal:
@@ -18,3 +17,16 @@ def parse_literal(literal_token: Token) -> Literal:
             return float(literal_token.match.group(0))
     else:
         raise ValueError("primitive_token.type not set to a literal")
+
+
+def expect_token(token: Token, expectation: Union[TokenType, Iterable[TokenType], Set[TokenType]]) -> Token:
+    if type(expectation) is not set:
+        try:
+            expectation = set(expectation)
+        except TypeError:
+            expectation = {expectation, }
+
+    if token.type not in expectation:
+        raise ValueError("Expected {token} to be of type {expected}")
+
+    return token
