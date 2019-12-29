@@ -1,6 +1,5 @@
 from typing import Set, Dict, Iterable
-from .exceptions import PreprocessorSyntaxError
-from .tokenizer import TokenType, Token
+from .tokenizer import TokenType, Token, VALUE_TYPES, OPERATOR_TYPES
 
 DEFAULT_PRECIDENCE_MAP = {
     TokenType.OP_DEFINED: 100,
@@ -19,20 +18,10 @@ DEFAULT_PRECIDENCE_MAP = {
 DEFAULT_RTL_SET = {TokenType.OP_NOT, TokenType.OP_DEFINED}
 
 
-VALUE_TOKENS = {TokenType.NUM_LITERAL, TokenType.STRING_LITERAL, TokenType.IDENTIFIER}
-
-
-OPERATOR_TOKENS = {
-    TokenType.OP_LT, TokenType.OP_GT, TokenType.OP_EQ, TokenType.OP_NEQ, TokenType.OP_LTE, TokenType.OP_GTE,
-    TokenType.OP_NOT, TokenType.OP_AND, TokenType.OP_OR, TokenType.OP_DEFINED, TokenType.OP_JOIN,
-    TokenType.OP_CONCAT
-}
-
-
 class ShuntingYard():
     def __init__(self, precidence_map: Dict[TokenType, int] = DEFAULT_PRECIDENCE_MAP,
-                 rtl_set: Set[Token] = DEFAULT_RTL_SET, value_token_set: Set[Token] = VALUE_TOKENS,
-                 operator_token_set: Set[Token] = OPERATOR_TOKENS):
+                 rtl_set: Set[TokenType] = DEFAULT_RTL_SET, value_token_set: Set[TokenType] = VALUE_TYPES,
+                 operator_token_set: Set[TokenType] = OPERATOR_TYPES):
         self.precidence = precidence_map
         self.rtl_set = rtl_set
         self.value_tokens = value_token_set

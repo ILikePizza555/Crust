@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Optional, List, Generator
+from typing import Optional, List
 import re
 
 
@@ -25,6 +25,17 @@ class TokenType(Enum):
     OP_DEFINED = auto()
     OP_JOIN = auto()
     OP_CONCAT = auto()
+
+
+LITERAL_TYPES = {TokenType.STRING_LITERAL, TokenType.NUM_LITERAL}
+VALUE_TYPES = {TokenType.STRING_LITERAL, TokenType.NUM_LITERAL, TokenType.IDENTIFIER}
+COMPARISON_OPERATOR_TYPES = {
+    TokenType.OP_GT, TokenType.OP_LT, TokenType.OP_EQ, TokenType.OP_NEQ, TokenType.OP_GTE, TokenType.OP_LTE
+}
+BOOLEAN_OPERATOR_TYPES = {TokenType.OP_AND, TokenType.OP_OR}
+UNARY_BOOLEAN_OPERATOR_TYPES = {TokenType.OP_NOT, TokenType.OP_DEFINED}
+TOKEN_OPERATOR_TYPES = {TokenType.OP_JOIN, TokenType.OP_CONCAT}
+OPERATOR_TYPES = COMPARISON_OPERATOR_TYPES | BOOLEAN_OPERATOR_TYPES | SINGLE_BOOLEAN_OPERATOR_TYPES | TOKEN_OPERATOR_TYPES
 
 
 TOKEN_MAP = (
