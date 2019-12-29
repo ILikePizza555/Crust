@@ -39,7 +39,18 @@ class IncludeDirective:
 
         if path.type is TokenType.STRING_LITERAL:
             return cls(path.value.group(1), path.value.group(0).startswith("\""))
-    
+
+        raise NotImplementedError("Parsing include from identifier is not yet implemented")
+
     def __init__(self, path: str, expanded: bool):
         self.path = path
         self.expanded = expanded
+
+
+def parse_line(tokens: List[Token], identifier_table: IdentifierTable):
+    directive = expect_token(tokens[0], TokenType.DIRECTIVE)
+
+    if directive.value.group(1) == "include":
+        return IncludeDirective.from_tokens(tokens[1:], identifier_table)
+    
+    raise NotImplementedError(f"Parsing directive {directive.value.group(1)} is not yet implemented")
