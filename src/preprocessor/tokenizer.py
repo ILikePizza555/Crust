@@ -41,7 +41,7 @@ OPERATOR_TYPES = COMPARISON_OPERATOR_TYPES | BOOLEAN_OPERATOR_TYPES | UNARY_BOOL
 TOKEN_MAP = (
     (re.compile(r"\s"),             TokenType.WHITESPACE),
     (re.compile(r"#(\S*)"),         TokenType.DIRECTIVE),
-    (re.compile(r"[\"<](.*)[\">]"), TokenType.STRING_LITERAL),
+    (re.compile(r"\"(.*)\""), TokenType.STRING_LITERAL),
     (re.compile(r"(\d+)(\S?)(\d*)"), TokenType.NUM_LITERAL),
     (re.compile(r"defined"),        TokenType.OP_DEFINED),
     (re.compile(r"=="),             TokenType.OP_EQ),

@@ -1,4 +1,5 @@
-from typing import Union, Iterable, Dict, List, Optional, Set
+from typing import Union, Iterable, Dict, List, Optional, Set, Iterator
+from itertools import takewhile
 from .tokenizer import TokenType, Token
 
 
@@ -32,25 +33,45 @@ def expect_token(token: Token, expectation: Union[TokenType, Iterable[TokenType]
     return token
 
 
+def peek_token(tokens: List[Token], expectation: Union[TokenType, Set[TokenType]], i: int = 0) -> bool:
+    """Looks at the type of the ith token in the list and compares it to expected set."""
+    if type(expectation) is not set:
+        expectation = {expectation, }
+    
+    return tokens[i].type in expectation
+
+
 class IncludeDirective:
     @classmethod
-    def from_tokens(cls, tokens: List[Token], identifier_table: IdentifierTable):
-        path = expect_token(tokens[0], {TokenType.STRING_LITERAL, TokenType.IDENTIFIER})
+    def from_tokens(cls, tokens: List[Token]):
+        first = expect_token(tokens[0], {TokenType.STRING_LITERAL, TokenType.OP_LT, TokenType.IDENTIFIER})
 
-        if path.type is TokenType.STRING_LITERAL:
-            return cls(path.value.group(1), path.value.group(0).startswith("\""))
+        if first.type is TokenType.IDENTIFIER:
+            raise NotImplementedError("Include directives from identifiers are not yet implemented")
 
-        raise NotImplementedError("Parsing include from identifier is not yet implemented")
+        if first.type is TokenType.OP_LT:
+            path_tokens: Iterator[Token] = takewhile(lambda t: t.type != TokenType.OP_GT, tokens[1:])
+
+            if len(path_tokens) == 0:
+                raise Exception("Cannot have empty path")
+
+            path = "".join(t.value.group() for t in path_tokens)
+            return cls(path, False)
+        elif first.type is TokenType.STRING_LITERAL:
+            return cls(first.value.group(1), True)
 
     def __init__(self, path: str, expanded: bool):
         self.path = path
         self.expanded = expanded
 
+    def __eq__(self, o):
+        return self.path == o.path and self.expanded == o.expanded
 
-def parse_line(tokens: List[Token], identifier_table: IdentifierTable):
+
+def parse_line(tokens: List[Token]):
     directive = expect_token(tokens[0], TokenType.DIRECTIVE)
 
     if directive.value.group(1) == "include":
-        return IncludeDirective.from_tokens(tokens[1:], identifier_table)
+        return IncludeDirective.from_tokens(tokens[1:])
     
     raise NotImplementedError(f"Parsing directive {directive.value.group(1)} is not yet implemented")
