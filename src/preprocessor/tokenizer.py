@@ -63,7 +63,7 @@ TOKEN_MAP = (
     (re.compile(r"#"),              TokenType.OP_JOIN),
     (re.compile(r"!"),              TokenType.OP_NOT),
     (re.compile(r"[a-zA-Z]\w+"),    TokenType.IDENTIFIER),
-    (re.compile(r"\S+"),            TokenType.GENERIC)
+    (re.compile(r"\S"),             TokenType.GENERIC)
 )
 
 
