@@ -65,10 +65,7 @@ def peek_token(tokens: List[Token], expectation: Union[TokenType, Set[TokenType]
 class IncludeDirective:
     @classmethod
     def from_tokens(cls, tokens: List[Token]):
-        first = expect_token(tokens[0], {TokenType.STRING_LITERAL, TokenType.OP_LT, TokenType.IDENTIFIER})
-
-        if first.type is TokenType.IDENTIFIER:
-            raise NotImplementedError("Include directives from identifiers are not yet implemented")
+        first = expect_token(tokens[0], {TokenType.STRING_LITERAL, TokenType.OP_LT})
 
         if first.type is TokenType.OP_LT:
             path_tokens: Iterator[Token] = takewhile(lambda t: t.type != TokenType.OP_GT, tokens[1:])
@@ -90,6 +87,15 @@ class IncludeDirective:
 
     def __eq__(self, o):
         return self.path == o.path and self.expanded == o.expanded
+
+
+class DifferedIncludeDirective:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        return cls(expect_token(tokens[0], TokenType.IDENTIFIER))
+
+    def __init__(self, identifier):
+        self.identifier = identifier
 
 
 class ObjectMacro:
@@ -133,10 +139,15 @@ class FunctionMacro:
         return self.identifier == o.identifier and self.params == o.params and self.expression == o.expression
 
 
-def parse_line(tokens: List[Token]):
+ASTObject = Union[IncludeDirective, DifferedIncludeDirective, ObjectMacro, FunctionMacro]
+
+
+def parse_line(tokens: List[Token]) -> ASTObject:
     directive = expect_token(tokens[0], TokenType.DIRECTIVE)
 
     if directive.value.group(1) == "include":
+        if tokens[1].type is TokenType.IDENTIFIER:
+            return DifferedIncludeDirective.from_tokens(tokens[1:])
         return IncludeDirective.from_tokens(tokens[1:])
     if directive.value.group(1) == "define":
         if tokens[2].type is TokenType.LPAREN:
