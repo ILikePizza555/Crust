@@ -20,6 +20,27 @@ def parse_literal(literal_token: Token) -> Literal:
         raise ValueError("primitive_token.type not set to a literal")
 
 
+def parse_identifier_list(tokens: Iterable[Token]) -> Iterable[Token]:
+    """
+    Parses an expression of LPAREN (IDENTIFIER COMMA)* RPAREN
+    """
+
+    expect_token(tokens[0], TokenType.LPAREN)
+    cursor = 1
+    rv = []
+
+    while cursor < len(tokens):
+        rv.append(expect_token(tokens[cursor]), TokenType.IDENTIFIER)
+        n = expect_token(tokens[cursor + 1], {TokenType.COMMA, TokenType.RPAREN})
+
+        if n.type is TokenType.RPAREN:
+            break
+
+        cursor += 2
+
+    return rv
+
+
 def expect_token(token: Token, expectation: Union[TokenType, Iterable[TokenType], Set[TokenType]]) -> Token:
     if type(expectation) is not set:
         try:
