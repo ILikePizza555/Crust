@@ -117,7 +117,7 @@ class FunctionMacro:
     def from_tokens(cls, tokens: List[Token]):
         identifer = expect_token(tokens[0], TokenType.IDENTIFIER)
         params = parse_identifier_list(tokens[1:])
-        expression = tokens[len(params):]
+        expression = tokens[2 + 2 * len(params):]
 
         return cls(identifer.value.group(), tuple(t.value.group() for t in params), expression)
 
