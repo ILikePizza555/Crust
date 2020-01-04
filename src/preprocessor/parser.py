@@ -58,7 +58,7 @@ def peek_token(tokens: List[Token], expectation: Union[TokenType, Set[TokenType]
     """Looks at the type of the ith token in the list and compares it to expected set."""
     if type(expectation) is not set:
         expectation = {expectation, }
-    
+
     return tokens[i].type in expectation
 
 
@@ -90,6 +90,41 @@ class IncludeDirective:
 
     def __eq__(self, o):
         return self.path == o.path and self.expanded == o.expanded
+
+
+class ObjectMacro:
+    """
+    Mapping of a sequence of tokens to an identifier
+    """
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        identifier = expect_token(tokens[0], TokenType.IDENTIFIER)
+        return cls(identifier.value.group(), tokens[1:])
+
+    def __init__(self, identifier: str, tokens: List[Token]):
+        self.identifier = identifier
+        self.tokens = tokens
+
+    def __repr__(self):
+        return f"ObjectMacro(identifier={self.identifier}, tokens={self.tokens})"
+
+
+class FunctionMacro:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        identifer = expect_token(tokens[0], TokenType.IDENTIFIER)
+        params = parse_identifier_list(tokens[1:])
+        expression = tokens[len(params):]
+
+        return cls(identifer.value.group(), tuple(t.value.group() for t in params), expression)
+
+    def __init__(self, identifier: str, params: Iterable[str], expression: Iterable[Token]):
+        self.identifier = identifier
+        self.params = params
+        self.expression = expression
+
+    def __repr__(self):
+        return f"FunctionMacro(identifier={self.identifier}, params={self.params}, expression={self.expression})"
 
 
 def parse_line(tokens: List[Token]):
