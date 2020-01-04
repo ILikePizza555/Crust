@@ -108,6 +108,9 @@ class ObjectMacro:
     def __repr__(self):
         return f"ObjectMacro(identifier={self.identifier}, tokens={self.tokens})"
 
+    def __eq__(self, o):
+        return self.identifier == o.identifier and self.tokens == o.tokens
+
 
 class FunctionMacro:
     @classmethod
@@ -125,6 +128,9 @@ class FunctionMacro:
 
     def __repr__(self):
         return f"FunctionMacro(identifier={self.identifier}, params={self.params}, expression={self.expression})"
+    
+    def __eq__(self, o):
+        return self.identifier == o.identifier and self.params == o.params and self.expression == o.expression
 
 
 def parse_line(tokens: List[Token]):
