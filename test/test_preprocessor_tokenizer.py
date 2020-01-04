@@ -2,6 +2,7 @@ import pytest # NOQA
 from .utilities import NamedTestMatrix
 from src.preprocessor.tokenizer import Token, TokenType, tokenize_line
 
+
 SINGLE_TOKEN_TESTS = NamedTestMatrix(
     ("input_str", "expected_type"),
     (
@@ -17,7 +18,9 @@ SINGLE_TOKEN_TESTS = NamedTestMatrix(
         ("grea than",   ">",        TokenType.OP_GT),
         ("not",         "!",        TokenType.OP_NOT),
         ("identifier",  "UWU2",     TokenType.IDENTIFIER),
-        ("generic",     "~",        TokenType.GENERIC)
+        ("generic",     "~",        TokenType.GENERIC),
+        ("single-char identifier", "A", TokenType.IDENTIFIER),
+
     )
 )
 @pytest.mark.parametrize(SINGLE_TOKEN_TESTS.arg_names, SINGLE_TOKEN_TESTS.arg_values, ids=SINGLE_TOKEN_TESTS.test_names)
