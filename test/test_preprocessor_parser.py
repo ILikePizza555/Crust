@@ -29,10 +29,10 @@ def test_parse_object_macro():
 
 
 def test_parse_function_macro():
-    tokens = list(filter(lambda t: t.type is not TokenType.WHITESPACE, tokenize_line("#define A(B, C) B + C")))
+    tokens = list(filter(lambda t: t.type is not TokenType.WHITESPACE, tokenize_line("#define A(B, C, D, E, F, G) B + C")))
     actual = parse_line(tokens)
 
     assert isinstance(actual, FunctionMacro)
     assert actual.identifier == "A"
-    assert actual.params == ["B", "C"]
+    assert actual.params == ("B", "C", "D", "E", "F", "G")
     assert [t.value.group() for t in actual.expression] == ["B", "+", "C"]
