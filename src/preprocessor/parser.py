@@ -138,5 +138,9 @@ def parse_line(tokens: List[Token]):
 
     if directive.value.group(1) == "include":
         return IncludeDirective.from_tokens(tokens[1:])
+    if directive.value.group(1) == "define":
+        if tokens[2].type is TokenType.LPAREN:
+            return FunctionMacro.from_tokens(tokens[1:])
+        return ObjectMacro.from_tokens(tokens[1:])
     
     raise NotImplementedError(f"Parsing directive {directive.value.group(1)} is not yet implemented")
