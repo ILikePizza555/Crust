@@ -30,7 +30,7 @@ def parse_identifier_list(tokens: Iterable[Token]) -> Iterable[Token]:
     rv = []
 
     while cursor < len(tokens):
-        rv.append(expect_token(tokens[cursor]), TokenType.IDENTIFIER)
+        rv.append(expect_token(tokens[cursor], TokenType.IDENTIFIER))
         n = expect_token(tokens[cursor + 1], {TokenType.COMMA, TokenType.RPAREN})
 
         if n.type is TokenType.RPAREN:
@@ -49,7 +49,7 @@ def expect_token(token: Token, expectation: Union[TokenType, Iterable[TokenType]
             expectation = {expectation, }
 
     if token.type not in expectation:
-        raise ValueError("Expected {token} to be of type {expected}")
+        raise ValueError(f"Expected {token} to be of type {expectation}")
 
     return token
 
