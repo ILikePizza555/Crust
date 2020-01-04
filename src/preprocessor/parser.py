@@ -51,11 +51,11 @@ class IncludeDirective:
 
         if first.type is TokenType.OP_LT:
             path_tokens: Iterator[Token] = takewhile(lambda t: t.type != TokenType.OP_GT, tokens[1:])
+            path = "".join(t.value.group() for t in path_tokens)
 
-            if len(path_tokens) == 0:
+            if len(path) == 0:
                 raise Exception("Cannot have empty path")
 
-            path = "".join(t.value.group() for t in path_tokens)
             return cls(path, False)
         elif first.type is TokenType.STRING_LITERAL:
             return cls(first.value.group(1), True)
@@ -63,6 +63,9 @@ class IncludeDirective:
     def __init__(self, path: str, expanded: bool):
         self.path = path
         self.expanded = expanded
+
+    def __repr__(self):
+        return f"IncludeDirective(path={self.path}, expanded={self.expanded})"
 
     def __eq__(self, o):
         return self.path == o.path and self.expanded == o.expanded
