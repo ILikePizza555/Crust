@@ -92,9 +92,9 @@ class IncludeDirective:
 class DifferedIncludeDirective:
     @classmethod
     def from_tokens(cls, tokens: List[Token]):
-        return cls(expect_token(tokens[0], TokenType.IDENTIFIER))
+        return cls(expect_token(tokens[0], TokenType.IDENTIFIER).value.group())
 
-    def __init__(self, identifier):
+    def __init__(self, identifier: str):
         self.identifier = identifier
 
 
