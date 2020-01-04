@@ -128,7 +128,7 @@ class FunctionMacro:
 
     def __repr__(self):
         return f"FunctionMacro(identifier={self.identifier}, params={self.params}, expression={self.expression})"
-    
+
     def __eq__(self, o):
         return self.identifier == o.identifier and self.params == o.params and self.expression == o.expression
 
@@ -142,5 +142,5 @@ def parse_line(tokens: List[Token]):
         if tokens[2].type is TokenType.LPAREN:
             return FunctionMacro.from_tokens(tokens[1:])
         return ObjectMacro.from_tokens(tokens[1:])
-    
+
     raise NotImplementedError(f"Parsing directive {directive.value.group(1)} is not yet implemented")
