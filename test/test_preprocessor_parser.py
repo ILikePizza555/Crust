@@ -1,5 +1,5 @@
 import pytest
-from src.preprocessor.parser import IncludeDirective, parse_line, ObjectMacro, FunctionMacro
+from src.preprocessor.parser_1 import IncludeDirective, parse_line, ObjectMacro, FunctionMacro
 from src.preprocessor.tokenizer import tokenize_line, TokenType
 from .utilities import NamedTestMatrix
 
