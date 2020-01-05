@@ -1,7 +1,5 @@
 """
-Defines objects and functions that act on tokens.
-
-Note that the primary purpose of the parser to is *organize* tokens, not evaluate them.
+Phase 1 of the parsing step. Organizes tokens into contectual objects by line.
 """
 from typing import Union, Iterable, Dict, List, Set, Iterator
 from itertools import takewhile
