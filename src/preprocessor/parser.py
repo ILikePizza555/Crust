@@ -1,149 +1,149 @@
-from typing import List, Callable, Dict, Optional, Tuple, Union
-from .ast import ASTObject, Expression, ObjectMacro, FunctionMacro, EvaluatedInclude, DeferedInclude, ConditionalBranch, _expect_directive, _expect_token
-from .tokenizer import Token, TokenType
-from .exceptions import UnknownPreprocessorDirectiveError, UnexpectedTokenError, PreprocessorSyntaxError
+"""
+Defines objects and functions that act on tokens.
+
+Note that the primary purpose of the parser to is *organize* tokens, not evaluate them.
+"""
+from typing import Union, Iterable, Dict, List, Set, Iterator
+from itertools import takewhile
+from .tokenizer import TokenType, Token
 
 
-class ParserBase():
-    def __init__(self, token_lines: List[List[Token]]):
-        self._lines = token_lines
-        self._current_line = 0
-        self.parse_methods: Dict[str, Callable[None, ASTObject]] = dict()
+Literal = Union[str, int, float]
+IdentifierTable = Dict[str, Literal]
 
-    def peak_current_line(self) -> List[Token]:
-        """Returns the current line without incrementing the line counter"""
-        return self._lines[self._current_line]
 
-    def get_current_line_number(self) -> int:
-        """Returns the line number of the the current token."""
-        return self.peak_current_line()[0].line
+def parse_identifier_list(tokens: Iterable[Token]) -> Iterable[Token]:
+    """
+    Parses an expression of LPAREN (IDENTIFIER COMMA)* RPAREN
+    """
 
-    def read_next_lines(self, n: int):
-        """Returns the next n lines and increments the line counter."""
-        self._current_line = min(self._current_line + n, len(self._lines))
-        return self._lines[self._current_line - n:self._current_line]
+    expect_token(tokens[0], TokenType.LPAREN)
+    cursor = 1
+    rv = []
 
-    def read_current_line(self):
-        """Returns the next line and increments the line counter."""
-        ret = self.read_next_lines(1)
-        return ret[0] if ret else []
+    while cursor < len(tokens):
+        rv.append(expect_token(tokens[cursor], TokenType.IDENTIFIER))
+        n = expect_token(tokens[cursor + 1], {TokenType.COMMA, TokenType.RPAREN})
 
-    def peek_directive(self) -> str:
-        """Looks at the current line's directive and returns it."""
-        peek_directive_tok = self.peak_current_line()[0]
-        assert peek_directive_tok.token_type is TokenType.DIRECTIVE
-        return peek_directive_tok.match.group(1)
+        if n.type is TokenType.RPAREN:
+            break
 
-    def _parse_ignore(self):
-        self.read_current_line()
-        return None
+        cursor += 2
 
-    @property
-    def done(self):
-        return self._current_line >= len(self._lines)
+    return rv
 
-    def parse_next(self) -> Optional[ASTObject]:
+
+def expect_token(token: Token, expectation: Union[TokenType, Iterable[TokenType], Set[TokenType]]) -> Token:
+    if type(expectation) is not set:
         try:
-            if not self.done:
-                parse_method = self.parse_methods[self.peek_directive()]
-                return parse_method()
-        except KeyError:
-            raise UnknownPreprocessorDirectiveError(self.get_current_line_number(), self.peek_directive())
+            expectation = set(expectation)
+        except TypeError:
+            expectation = {expectation, }
 
-    def parse_lines(self) -> List[ASTObject]:
-        object_return = []
+    if token.type not in expectation:
+        raise ValueError(f"Expected {token} to be of type {expectation}")
 
-        while not self.done:
-            object_return.append(self.parse_next())
-
-        return object_return
+    return token
 
 
-class Parser(ParserBase):
-    def __init__(self, token_lines: List[List[Token]]):
-        super(Parser, self).__init__(token_lines)
+def peek_token(tokens: List[Token], expectation: Union[TokenType, Set[TokenType]], i: int = 0) -> bool:
+    """Looks at the type of the ith token in the list and compares it to expected set."""
+    if type(expectation) is not set:
+        expectation = {expectation, }
 
-        # TODO: Make this into some sort of decorator functionality
-        self.parse_methods.update({
-            "include": self.parse_include_line,
-            "define": self.parse_define_line,
-            "if": self.parse_if_block,
-            "ifdef": self.parse_if_block,
-            "ifndef": self.parse_if_block,
-            "pragma": self._parse_ignore
-        })
+    return tokens[i].type in expectation
 
-    def parse_include_line(self) -> Union[EvaluatedInclude, DeferedInclude]:
-        current_line = self.read_current_line()
-        _expect_directive(current_line, "include")
 
-        param = _expect_token(current_line, {TokenType.IDENTIFIER, TokenType.STRING, TokenType.FILENAME})
+class IncludeDirective:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        first = expect_token(tokens[0], {TokenType.STRING_LITERAL, TokenType.OP_LT})
 
-        try:
-            return EvaluatedInclude.from_tokens([param])
-        except PreprocessorSyntaxError:
-            return DeferedInclude(param)
+        if first.type is TokenType.OP_LT:
+            path_tokens: Iterator[Token] = takewhile(lambda t: t.type != TokenType.OP_GT, tokens[1:])
+            path = "".join(t.value.group() for t in path_tokens)
 
-    def parse_define_line(self) -> Union[FunctionMacro, ObjectMacro]:
-        current_line = self.read_current_line()
-        _expect_directive(current_line, "define")
+            if len(path) == 0:
+                raise Exception("Cannot have empty path")
 
-        # TODO: Better syntax error handling
-        try:
-            return FunctionMacro.from_tokens(current_line[:])
-        except UnexpectedTokenError:
-            return ObjectMacro.from_tokens(current_line)
+            return cls(path, False)
+        elif first.type is TokenType.STRING_LITERAL:
+            return cls(first.value.group(1), True)
 
-    def parse_conditional_line(self) -> Tuple[str, Union[Expression, Token, None]]:
-        current_line = self.read_current_line()
-        directive = _expect_token(current_line, {TokenType.DIRECTIVE, })
-        directive_str = directive.match.group(1).upper()
+    def __init__(self, path: str, expanded: bool):
+        self.path = path
+        self.expanded = expanded
 
-        if directive_str in {"IF", "ELIF"}:
-            return (directive_str, Expression.from_tokens(current_line))
-        elif directive_str in {"IFDEF", "IFNDEF"}:
-            return (directive_str, current_line.pop(0))
-        else:
-            return (directive_str, None)
+    def __repr__(self):
+        return f"IncludeDirective(path={self.path}, expanded={self.expanded})"
 
-    def parse_if_block(self) -> List[ConditionalBranch]:
-        block_markers = [(x[1], x[2]) for x in self._read_conditional_block() if x[0] == 1]
-        block_ranges = ((a[1], b[1]) for a, b in zip(block_markers, block_markers[1:]))
-        branches: List[ConditionalBranch] = []
+    def __eq__(self, o):
+        return self.path == o.path and self.expanded == o.expanded
 
-        for begin, end in block_ranges:
-            line_type, value = self.parse_conditional_line()
-            children: List[ASTObject] = []
 
-            while self._current_line < end:
-                children.append(self.parse_next())
+class DifferedIncludeDirective:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        return cls(expect_token(tokens[0], TokenType.IDENTIFIER).value.group())
 
-            if self.peek_directive() == "endif":
-                self.read_current_line()
+    def __init__(self, identifier: str):
+        self.identifier = identifier
 
-            branches.append(ConditionalBranch(children, value))
 
-        return branches
+class ObjectMacro:
+    """
+    Mapping of a sequence of tokens to an identifier
+    """
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        identifier = expect_token(tokens[0], TokenType.IDENTIFIER)
+        return cls(identifier.value.group(), tokens[1:])
 
-    def _read_conditional_block(self) -> List[Tuple[int, str, int]]:
-        if_stack = 0
-        markers: List[Tuple[str, int]] = []
+    def __init__(self, identifier: str, tokens: List[Token]):
+        self.identifier = identifier
+        self.tokens = tokens
 
-        for line_number, line in enumerate(self._lines[self._current_line:], start=self._current_line):
-            beginning = line[0]
-            assert beginning.token_type is TokenType.DIRECTIVE
-            directive = beginning.match.group(1).upper()
+    def __repr__(self):
+        return f"ObjectMacro(identifier={self.identifier}, tokens={self.tokens})"
 
-            if directive in {"IF", "IFDEF", "IFNDEF"}:
-                if_stack += 1
-                markers.append((if_stack, directive, line_number))
-            elif directive in {"ELSE", "ELIF"}:
-                markers.append((if_stack, directive, line_number))
-            elif beginning.match.group(1).upper() == "ENDIF":
-                markers.append((if_stack, directive, line_number))
-                if_stack -= 1
+    def __eq__(self, o):
+        return self.identifier == o.identifier and self.tokens == o.tokens
 
-                if if_stack == 0:
-                    return markers
 
-        raise PreprocessorSyntaxError(line_number, 0, "Expected #endif")
+class FunctionMacro:
+    @classmethod
+    def from_tokens(cls, tokens: List[Token]):
+        identifer = expect_token(tokens[0], TokenType.IDENTIFIER)
+        params = parse_identifier_list(tokens[1:])
+        expression = tokens[2 + 2 * len(params):]
+
+        return cls(identifer.value.group(), tuple(t.value.group() for t in params), expression)
+
+    def __init__(self, identifier: str, params: Iterable[str], expression: Iterable[Token]):
+        self.identifier = identifier
+        self.params = params
+        self.expression = expression
+
+    def __repr__(self):
+        return f"FunctionMacro(identifier={self.identifier}, params={self.params}, expression={self.expression})"
+
+    def __eq__(self, o):
+        return self.identifier == o.identifier and self.params == o.params and self.expression == o.expression
+
+
+ASTObject = Union[IncludeDirective, DifferedIncludeDirective, ObjectMacro, FunctionMacro]
+
+
+def parse_line(tokens: List[Token]) -> ASTObject:
+    directive = expect_token(tokens[0], TokenType.DIRECTIVE)
+
+    if directive.value.group(1) == "include":
+        if tokens[1].type is TokenType.IDENTIFIER:
+            return DifferedIncludeDirective.from_tokens(tokens[1:])
+        return IncludeDirective.from_tokens(tokens[1:])
+    if directive.value.group(1) == "define":
+        if tokens[2].type is TokenType.LPAREN:
+            return FunctionMacro.from_tokens(tokens[1:])
+        return ObjectMacro.from_tokens(tokens[1:])
+
+    raise NotImplementedError(f"Parsing directive {directive.value.group(1)} is not yet implemented")

@@ -1,159 +1,103 @@
+from enum import Enum, auto
+from typing import Optional, List
 import re
-from enum import Enum, unique, auto
-from typing import List, Optional, Tuple
-from .exceptions import UnknownTokenError
-from ..useful import StringCursor
 
 
-@unique
 class TokenType(Enum):
+    WHITESPACE = 0
+    GENERIC = 1
+    STRING_LITERAL = auto()
+    NUM_LITERAL = auto()
     DIRECTIVE = auto()
     IDENTIFIER = auto()
-    INTEGER_CONST = auto()
-    CHAR_CONST = auto()
-    STRING = auto()
-    FILENAME = auto()
-    DEFINED = auto()
-    ELLIPSIS = auto()
-    LESS_THAN_OR_EQUAL = auto()
-    GREATER_THAN_OR_EQUAL = auto()
-    EQUAL = auto()
-    NOT_EQUAL = auto()
-    AND = auto()
-    OR = auto()
-    TOKEN_CONCATINATION = auto()
-    LPARAN = auto()
-    RPARAN = auto()
+    LPAREN = auto()
+    RPAREN = auto()
     COMMA = auto()
-    LESS_THAN = auto()
-    GREATER_THAN = auto()
-    NOT = auto()
-    ASSIGNMENT = auto()
-    TOKEN_STRINGIFICATION = auto()
+    OP_LT = auto()
+    OP_GT = auto()
+    OP_EQ = auto()
+    OP_NEQ = auto()
+    OP_LTE = auto()
+    OP_GTE = auto()
+    OP_NOT = auto()
+    OP_AND = auto()
+    OP_OR = auto()
+    OP_DEFINED = auto()
+    OP_JOIN = auto()
+    OP_CONCAT = auto()
 
 
-VALUE_TOKENS = {
-    TokenType.IDENTIFIER, TokenType.CHAR_CONST, TokenType.INTEGER_CONST
+LITERAL_TYPES = {TokenType.STRING_LITERAL, TokenType.NUM_LITERAL}
+VALUE_TYPES = {TokenType.STRING_LITERAL, TokenType.NUM_LITERAL, TokenType.IDENTIFIER}
+COMPARISON_OPERATOR_TYPES = {
+    TokenType.OP_GT, TokenType.OP_LT, TokenType.OP_EQ, TokenType.OP_NEQ, TokenType.OP_GTE, TokenType.OP_LTE
 }
+BOOLEAN_OPERATOR_TYPES = {TokenType.OP_AND, TokenType.OP_OR}
+UNARY_BOOLEAN_OPERATOR_TYPES = {TokenType.OP_NOT, TokenType.OP_DEFINED}
+TOKEN_OPERATOR_TYPES = {TokenType.OP_JOIN, TokenType.OP_CONCAT}
+OPERATOR_TYPES = COMPARISON_OPERATOR_TYPES | BOOLEAN_OPERATOR_TYPES | UNARY_BOOLEAN_OPERATOR_TYPES | TOKEN_OPERATOR_TYPES
 
-RTL_OPS = {
-    TokenType.NOT, TokenType.DEFINED
-}
 
-OPERATOR_TOKENS = {
-    TokenType.NOT, TokenType.DEFINED, TokenType.EQUAL, TokenType.NOT_EQUAL,
-    TokenType.GREATER_THAN_OR_EQUAL, TokenType.LESS_THAN_OR_EQUAL, TokenType.GREATER_THAN,
-    TokenType.LESS_THAN, TokenType.AND, TokenType.OR
-}
-
-# List of 2-tuples, pairing the TokenType with a way to match it. Sorted in order of priority.
 TOKEN_MAP = (
-    (TokenType.STRING,                  re.compile(r'^"(.*)"')),
-    (TokenType.FILENAME,                re.compile(r'^<(\s*\S*\s*)>')),
-    (TokenType.INTEGER_CONST,           re.compile(r"^(\d+)")),
-    (TokenType.CHAR_CONST,              re.compile(r"^('.')")),
-    (TokenType.DEFINED,                 re.compile(r"defined")),
-    (TokenType.ELLIPSIS,                re.compile(r"\.\.\.")),
-    (TokenType.LESS_THAN_OR_EQUAL,      re.compile(r"<=")),
-    (TokenType.GREATER_THAN_OR_EQUAL,   re.compile(r">=")),
-    (TokenType.EQUAL,                   re.compile(r"==")),
-    (TokenType.NOT_EQUAL,               re.compile(r"!=")),
-    (TokenType.AND,                     re.compile(r"&&")),
-    (TokenType.OR,                      re.compile(r"\|\|")),
-    (TokenType.TOKEN_CONCATINATION,     re.compile(r"##")),
-    (TokenType.LPARAN,                  re.compile(r"\(")),
-    (TokenType.RPARAN,                  re.compile(r"\)")),
-    (TokenType.COMMA,                   re.compile(r",")),
-    (TokenType.LESS_THAN,               re.compile(r"<")),
-    (TokenType.GREATER_THAN,            re.compile(r">")),
-    (TokenType.NOT,                     re.compile(r"!")),
-    (TokenType.TOKEN_STRINGIFICATION,   re.compile(r"#")),
-    (TokenType.ASSIGNMENT,              re.compile(r"=")),
-    (TokenType.IDENTIFIER,              re.compile(r"^(\w+)"))
+    (re.compile(r"\s"),             TokenType.WHITESPACE),
+    (re.compile(r"#(\S*)"),         TokenType.DIRECTIVE),
+    (re.compile(r"\"(.*)\""), TokenType.STRING_LITERAL),
+    (re.compile(r"(\d+)(\S?)(\d*)"), TokenType.NUM_LITERAL),
+    (re.compile(r"defined"),        TokenType.OP_DEFINED),
+    (re.compile(r"=="),             TokenType.OP_EQ),
+    (re.compile(r"!="),             TokenType.OP_NEQ),
+    (re.compile(r"(\d+)(\S?)(\d*)"), TokenType.NUM_LITERAL),
+    (re.compile(r"defined"),        TokenType.OP_DEFINED),
+    (re.compile(r"=="),             TokenType.OP_EQ),
+    (re.compile(r"!="),             TokenType.OP_NEQ),
+    (re.compile(r"<="),             TokenType.OP_LTE),
+    (re.compile(r">="),             TokenType.OP_GTE),
+    (re.compile(r"&&"),             TokenType.OP_AND),
+    (re.compile(r"\|\|"),           TokenType.OP_OR),
+    (re.compile(r"##"),             TokenType.OP_CONCAT),
+    (re.compile(r"<"),              TokenType.OP_LT),
+    (re.compile(r">"),              TokenType.OP_GT),
+    (re.compile(r"\("),             TokenType.LPAREN),
+    (re.compile(r"\)"),             TokenType.RPAREN),
+    (re.compile(r","),              TokenType.COMMA),
+    (re.compile(r"#"),              TokenType.OP_JOIN),
+    (re.compile(r"!"),              TokenType.OP_NOT),
+    (re.compile(r"[a-zA-Z]\w*"),    TokenType.IDENTIFIER),
+    (re.compile(r"\S"),             TokenType.GENERIC)
 )
 
 
 class Token():
-    """A simple class storing the token, its type, and its metadata"""
-    def __init__(self, token_type: TokenType, line: int, col: int, match: re.Match):
-        self.token_type = token_type
-        self.line = line
+    def __init__(self, ttype: TokenType, value: Optional[re.Match] = None, col: int = 0, line: int = 0):
+        self.type = ttype
+        self.value = value
         self.col = col
-        self.match = match
+        self.line = line
+
+    def __eq__(self, o):
+        return (self.type == o.type and
+                self.value == o.value and
+                self.col == o.col and
+                self.line == o.line)
 
     def __repr__(self):
-        return f"Token(token_type={self.token_type}, line={self.line}, col={self.line}, match={self.match})"
-
-    @property
-    def error_str(self):
-        """Returns a string representation for use in error text."""
-        return f"\"{self.token_type}\" at {self.line}, {self.col}"
+        return f"Token(ttype: {self.type}, value: {self.value}, col: {self.col}, line: {self.line})"
 
 
-def _tokenize_directive(cursor: StringCursor, line_number: int) -> Optional[Token]:
-    directive_match = cursor.read_match(r"#(\S*)")
+def tokenize_line_iter(line: str, line_num: int = 0):
+    cursor = 0
 
-    if not directive_match:
-        raise UnknownTokenError(line_number, 0, cursor.peak())
+    while cursor < len(line):
+        match_generator = ((regex.match(line, cursor), token_type) for regex, token_type in TOKEN_MAP)
+        match, token_type = next(x for x in match_generator if x[0] is not None)
 
-    return Token(TokenType.DIRECTIVE, line_number, 1, directive_match)
-
-
-def _read_next_token(cursor: StringCursor, line_number: int) -> Token:
-    """Reads a token from cursor. Assumes the cursor is currently on a non-whitespace character."""
-    for token_type, matcher in TOKEN_MAP:
-        match = cursor.read_match(matcher)
-
-        if match:
-            column = cursor.position - len(match.group())
-            return Token(token_type, line_number, column, match)
-
-    raise UnknownTokenError(line_number, cursor.position, cursor.unread_slice)
+        if match is not None:
+            y = Token(token_type, match, cursor, line_num)
+            cursor += len(match.group(0))
+            yield y
+        else:
+            raise Exception("This should never happen. Unknown tokens are Generic.")
 
 
-def tokenize_line(cursor: StringCursor, line_number: int) -> Tuple[List[Token], int]:
-    """Tokenizes a logical line, following escaped newlines. Returns the tokens and the number of lines read"""
-    line_offset = 0
-    return_tokens = []
-
-    try:
-        return_tokens.append(_tokenize_directive(cursor, line_number))
-    except UnknownTokenError:
-        cursor.read_until("\n")
-
-    while(cursor.peak() != "\n" and not cursor.done()):
-        StringCursor.read_whitespace(cursor, {"\n", })
-        return_tokens.append(_read_next_token(cursor, line_number + line_offset))
-        StringCursor.read_whitespace(cursor, {"\n", })
-
-        if cursor.peak(2) == "\\\n":
-            cursor.read(2)
-            line_offset += 1
-
-    if cursor.peak() == "\n":
-        cursor.read()
-
-    return (return_tokens, line_offset + 1)
-
-
-def tokenize_file(filepath) -> List[List[Token]]:
-    with open(filepath) as file:
-        cursor = StringCursor(file.read())
-
-    return_tokens = []
-    line_counter = 0
-
-    while(not cursor.done()):
-        # Cleaning up any indentation
-        StringCursor.read_whitespace(cursor)
-
-        tokens, lines = tokenize_line(cursor, line_counter)
-        if tokens:
-            return_tokens.append(tokens)
-        line_counter += lines
-
-        # Cleaning up and counting blank lines
-        blank_lines = cursor.read_until(lambda s: s[0] != "\n")
-        line_counter += len(blank_lines)
-
-    return return_tokens
+def tokenize_line(line: str, line_num: int = 0) -> List[Token]:
+    return list(tokenize_line_iter(line, line_num))
