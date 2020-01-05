@@ -96,9 +96,6 @@ class ShuntingYard():
 
             if tok.token_type in self.value_tokens:
                 self.output_stack.append(tok)
-
-            # Push right-to-left associative operators to the operator stack
-            # TODO: Add support for function here
             elif tok.token_type in self.rtl_set:
                 self.operator_stack.append(tok)
             elif tok.token_type in (self.op_tokens - self.rtl_set):
