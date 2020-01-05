@@ -131,19 +131,49 @@ class FunctionMacro:
         return self.identifier == o.identifier and self.params == o.params and self.expression == o.expression
 
 
-ASTObject = Union[IncludeDirective, DifferedIncludeDirective, ObjectMacro, FunctionMacro]
+class IfDirective:
+    def __init__(self, directive: str, expression: List[Token]):
+        self.directive = directive
+        self.expression = expression
+
+    def __repr__(self):
+        return f"IfDirective(directive={self.directive}, expression={self.expression})"
+
+    def __eq__(self, o):
+        return self.directive == o.directive and self.expression == o.expression
+
+
+class PragmaDirective:
+    def __init__(self, value: List[Token]):
+        self.value = value
+
+    def __repr__(self):
+        return f"PragmaDirective(value={self.value})"
+
+
+ASTObject = Union[IncludeDirective, DifferedIncludeDirective, ObjectMacro, FunctionMacro, IfDirective, PragmaDirective]
 
 
 def parse_line(tokens: List[Token]) -> ASTObject:
     directive = expect_token(tokens[0], TokenType.DIRECTIVE)
+    directive_str = directive.value.group(1)
 
-    if directive.value.group(1) == "include":
+    if directive_str == "include":
         if tokens[1].type is TokenType.IDENTIFIER:
             return DifferedIncludeDirective.from_tokens(tokens[1:])
         return IncludeDirective.from_tokens(tokens[1:])
-    if directive.value.group(1) == "define":
+
+    if directive_str == "define":
         if tokens[2].type is TokenType.LPAREN:
             return FunctionMacro.from_tokens(tokens[1:])
         return ObjectMacro.from_tokens(tokens[1:])
 
-    raise NotImplementedError(f"Parsing directive {directive.value.group(1)} is not yet implemented")
+    if directive_str in {"if", "ifdef", "ifndef", "elif"}:
+        return IfDirective(directive_str, tokens[1:])
+    if directive_str in {"else", "endif"}:
+        return IfDirective(directive_str, 0)
+
+    if directive_str == "pragma":
+        return PragmaDirective(tokens[1:])
+
+    raise NotImplementedError(f"Parsing directive {directive_str} is not yet implemented")
