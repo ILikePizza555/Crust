@@ -3,7 +3,7 @@ Defines objects and functions that act on tokens.
 
 Note that the primary purpose of the parser to is *organize* tokens, not evaluate them.
 """
-from typing import Union, Iterable, Dict, List, Set, Iterator, Tuple
+from typing import Union, Iterable, Dict, List, Set, Iterator
 from itertools import takewhile
 from .tokenizer import TokenType, Token
 
@@ -30,24 +30,6 @@ def parse_identifier_list(tokens: Iterable[Token]) -> Iterable[Token]:
 
         cursor += 2
 
-    return rv
-
-
-def parse_comma_separated_tokens(tokens: Iterable) -> Iterable[Tuple[Token]]:
-    """Parses an expression of LPAREN (ANY* COMMA)* RPAREN"""
-    expect_token(tokens[0], TokenType.LPAREN)
-    cursor = 1
-    rv = []
-
-    while cursor < len(tokens):
-        group = tuple(takewhile(lambda t: t.type not in {TokenType.COMMA, TokenType.RPAREN}, tokens[cursor:]))
-        rv.append(group)
-
-        if tokens[len(group)].type is TokenType.RPAREN:
-            break
-
-        cursor += len(group) + 1
-    
     return rv
 
 
