@@ -51,11 +51,12 @@ PARSE_IF_DIRECTIVE = NamedTestMatrix(
 )
 @pytest.mark.parametrize(PARSE_IF_DIRECTIVE.arg_names, PARSE_IF_DIRECTIVE.arg_values, ids=PARSE_IF_DIRECTIVE.test_names)
 def test_parse_if_directive(line, expected):
-    tokens = list(filter(lambda t: t.type is not TokenType.WHITESPACE, tokenize_line("#define A(B, C, D, E, F, G) B + C")))
+    tokens = list(filter(lambda t: t.type is not TokenType.WHITESPACE, tokenize_line(line)))
     actual = parse_line(tokens)
 
     assert actual.directive == expected.directive
 
     if not expected.expression:
-        assert not expected.expression
-    assert [t.value.group() for t in actual.expression] == expected.expression
+        assert not actual.expression
+    else:
+        assert [t.value.group() for t in actual.expression] == expected.expression
