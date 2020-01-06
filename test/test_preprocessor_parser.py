@@ -1,5 +1,5 @@
 import pytest
-from src.preprocessor.parser_1 import IncludeDirective, parse_line, ObjectMacro, FunctionMacro
+from src.preprocessor.parser import IncludeDirective, parse_line, ObjectMacro, FunctionMacro, IfDirective
 from src.preprocessor.tokenizer import tokenize_line, TokenType
 from .utilities import NamedTestMatrix
 
@@ -36,3 +36,26 @@ def test_parse_function_macro():
     assert actual.identifier == "A"
     assert actual.params == ("B", "C", "D", "E", "F", "G")
     assert [t.value.group() for t in actual.expression] == ["B", "+", "C"]
+
+
+PARSE_IF_DIRECTIVE = NamedTestMatrix(
+    ("line", "expected"),
+    (
+        ("normal if",   "#if 1",        IfDirective("if", ["1"])),
+        ("else if",     "#elif 0",      IfDirective("elif", ["0"])),
+        ("ifdef",       "#ifdef TRUE",  IfDirective("ifdef", ["TRUE"])),
+        ("ifndef",      "#ifndef A",    IfDirective("ifndef", ["A"])),
+        ("else",        "#else",        IfDirective("else", None)),
+        ("endif",       "#endif",       IfDirective("endif", None))
+    )
+)
+@pytest.mark.parametrize(PARSE_IF_DIRECTIVE.arg_names, PARSE_IF_DIRECTIVE.arg_values, ids=PARSE_IF_DIRECTIVE.test_names)
+def test_parse_if_directive(line, expected):
+    tokens = list(filter(lambda t: t.type is not TokenType.WHITESPACE, tokenize_line("#define A(B, C, D, E, F, G) B + C")))
+    actual = parse_line(tokens)
+
+    assert actual.directive == expected.directive
+    
+    if not expected.expression:
+        assert not expected.expression
+    assert [t.value.group() for t in actual.expression] == expected.expression
