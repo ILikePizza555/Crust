@@ -73,6 +73,36 @@ def evaluate_expression(expression_tokens: List[Token]):
     return eval_stack[0]
 
 
+def get_branches(objects: List[ASTObject]) -> List[Tuple[int, IfDirective]]:
+    directives: Iterator[Tuple[int, IfDirective]] = filter(lambda x: isinstance(x[1], IfDirective), enumerate(objects))
+    rv = []
+    depth = 0
+
+    for d in directives:
+        if d[1].directive in {"if", "ifdef"}:
+            depth += 1
+        elif d[1].directive == "endif":
+            depth -= 1
+
+        if depth == 1:
+            rv.append(d)
+
+    return rv
+
+
+def evaluate_choice(objects: List[ASTObject], i: int = 0):
+    branches = get_branches(objects)
+    last_index = branches[-1][0] + i + 1
+
+    for index, branch in enumerate(branches[:-1]):
+        if branch[1].directive == "else" or evaluate_expression(branch[1].expression):
+            next_index = branch[0] + i + 1
+            stop_index = branches[index + 1][0]
+            return (next_index, stop_index, last_index)
+
+    return last_index
+
+
 def evaluate_ast(ast_objects: List[ASTObject]):
     dependencies: Set[IncludeDirective] = set()
     macro_table: MacroTable = dict()
