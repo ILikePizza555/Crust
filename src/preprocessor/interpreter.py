@@ -122,7 +122,7 @@ def evaluate_ast(ast_objects: List[ASTObject], macro_table: Optional[MacroTable]
         elif isinstance(o, FunctionMacro):
             macro_table[o.identifier] = o
         elif isinstance(o, IfDirective):
-            if o.directive in {"if", "ifdef"}:
+            if o.directive in {"if", "ifdef", "ifndef"}:
                 choice_result = evaluate_choice(ast_objects[i:], i)
 
                 if type(choice_result) is tuple:
