@@ -136,6 +136,8 @@ def evaluate_ast(ast_objects: List[ASTObject], macro_table: Optional[MacroTable]
                 continue
 
             raise Exception(f"#{o.directive} without #if")
+        else:
+            raise TypeError(o)
 
         i += 1
 
