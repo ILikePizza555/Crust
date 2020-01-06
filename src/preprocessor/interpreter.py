@@ -1,6 +1,6 @@
-from typing import List, Dict, Set, Union
+from typing import List, Dict, Set, Union, Iterator, Tuple, Optional
 from .tokenizer import TokenType, VALUE_TYPES, OPERATOR_TYPES, Token
-from .parser import ASTObject, IncludeDirective, DifferedIncludeDirective, ObjectMacro, FunctionMacro
+from .parser import ASTObject, IncludeDirective, DifferedIncludeDirective, ObjectMacro, FunctionMacro, IfDirective
 from .shunting_yard import ShuntingYard
 
 
@@ -103,9 +103,11 @@ def evaluate_choice(objects: List[ASTObject], i: int = 0):
     return last_index
 
 
-def evaluate_ast(ast_objects: List[ASTObject]):
+def evaluate_ast(ast_objects: List[ASTObject], macro_table: Optional[MacroTable] = None):
     dependencies: Set[IncludeDirective] = set()
-    macro_table: MacroTable = dict()
+
+    if not macro_table:
+        macro_table = dict()
 
     i = 0
     while i < len(ast_objects):
@@ -119,6 +121,21 @@ def evaluate_ast(ast_objects: List[ASTObject]):
             macro_table[o.identifier] = o
         elif isinstance(o, FunctionMacro):
             macro_table[o.identifier] = o
+        elif isinstance(o, IfDirective):
+            if o.directive in {"if", "ifdef"}:
+                choice_result = evaluate_choice(ast_objects[i:], i)
+
+                if type(choice_result) is tuple:
+                    choice_start, choice_end, jump = choice_result
+                    recurse_ast = ast_objects[choice_start:choice_end]
+                    dependencies.update(evaluate_ast(recurse_ast, macro_table))
+                    i = jump
+                else:
+                    i = choice_result
+
+                continue
+
+            raise Exception(f"#{o.directive} without #if")
 
         i += 1
 
