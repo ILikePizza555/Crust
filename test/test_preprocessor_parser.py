@@ -55,7 +55,7 @@ def test_parse_if_directive(line, expected):
     actual = parse_line(tokens)
 
     assert actual.directive == expected.directive
-    
+
     if not expected.expression:
         assert not expected.expression
     assert [t.value.group() for t in actual.expression] == expected.expression
